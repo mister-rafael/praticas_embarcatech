@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Jogo do Carro na Rodovia</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+  <div id="game">
+    <div class="road-line" id="road-line"></div>
+    <div class="left-line"></div>
+    <div class="right-line"></div>
+    
+    <div class="player left" id="player"></div>
+    <div id="game-over">💥 Batida! Fim de jogo.</div>
+    
+    <div id="score">
+      Pontuação: 0
+      <span id="last-score">Última Pontuação: 0</span>
+      <span id="record-score">Recorde: 0</span>
+      <span id="speed-display">Velocidade: 50 km/h</span>
+    </div>
+  </div>
+
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <script src="/static/game.js"></script>
+</body>
+
+</html>
