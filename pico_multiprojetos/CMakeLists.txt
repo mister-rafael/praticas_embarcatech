@@ -54,10 +54,11 @@ pico_sdk_init()
 # Adiciona a(s) biblioteca(s) compartilhadas
 # Basicamente, ler o Cmakelist dentro da pasta
 add_subdirectory(lib/io_utils)
-#add_subdirectory(lib/rtos)
+add_subdirectory(lib/lib_oled)
 
 # Adiciona os programas (executáveis)
 # Basicamente, ler o Cmakelist dentro da pasta
 add_subdirectory(pisca_led)
 add_subdirectory(mensagem_serial)
 add_subdirectory(pratica_rtos)
+add_subdirectory(controle_acesso)
