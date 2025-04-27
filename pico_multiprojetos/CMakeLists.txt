@@ -1,3 +1,17 @@
+# == DO NOT EDIT THE FOLLOWING LINES for the Raspberry Pi Pico VS Code Extension to work ==
+if(WIN32)
+    set(USERHOME $ENV{USERPROFILE})
+else()
+    set(USERHOME $ENV{HOME})
+endif()
+set(sdkVersion 1.5.1)
+set(toolchainVersion 13_2_Rel1)
+set(picotoolVersion 2.0.0)
+set(picoVscode ${USERHOME}/.pico-sdk/cmake/pico-vscode.cmake)
+if (EXISTS ${picoVscode})
+    include(${picoVscode})
+endif()
+# ====================================================================================
 # ====================================================================================
 # Arquivo de configuração do projeto CMake para Raspberry Pi Pico
 
@@ -55,6 +69,7 @@ pico_sdk_init()
 # Basicamente, ler o Cmakelist dentro da pasta
 add_subdirectory(lib/io_utils)
 add_subdirectory(lib/lib_oled)
+add_subdirectory(lib/setup_utils)
 
 # Adiciona os programas (executáveis)
 # Basicamente, ler o Cmakelist dentro da pasta
@@ -62,3 +77,6 @@ add_subdirectory(pisca_led)
 add_subdirectory(mensagem_serial)
 add_subdirectory(pratica_rtos)
 add_subdirectory(controle_acesso)
+
+# Adiciona o subdiretório do projeto1
+add_subdirectory(projeto1)
