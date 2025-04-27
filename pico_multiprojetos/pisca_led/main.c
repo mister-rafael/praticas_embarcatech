@@ -1,10 +1,10 @@
 #include "pico/stdlib.h"
-#include "io_utils.h"
+#include "actions_io.h"
+#include "setup_utils.h"
 
 int main() {
-    const uint LED_PIN = 25;
-    iniciar_led(LED_PIN);
+    iniciar_led(BLUE_LED_PIN);
     while (true) {
-        piscar_led(LED_PIN, 500);
+        piscar_led(BLUE_LED_PIN, 500);
     }
 }

@@ -14,11 +14,13 @@ pico_enable_stdio_uart(pisca_led 0)
 # Adiciona caminhos para headers .h	Faz o compilador "enxergar" arquivos
 target_include_directories(pisca_led PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/../lib/io_utils
+    ${CMAKE_CURRENT_LIST_DIR}/../lib/setup_utils
 )
 # Liga o executável com as bibliotecas necessárias
 target_link_libraries(pisca_led
     pico_stdlib
     io_utils
+    setup_utils
 )
 
 # Gera arquivos .uf2, .bin, etc.
