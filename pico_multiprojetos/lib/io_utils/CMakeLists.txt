@@ -8,6 +8,8 @@ add_library(io_utils STATIC
 # Linka com bibliotecas externas que a io_utils precisa para funcionar
 target_link_libraries(io_utils
     pico_stdlib
+    hardware_pwm 
+    hardware_gpio
 )
 # Define onde estão os headers (arquivos .h) desta biblioteca
 target_include_directories(io_utils PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
