@@ -7,6 +7,8 @@ add_library(setup_utils STATIC
 target_link_libraries(setup_utils
     pico_stdlib
     hardware_i2c
+    hardware_pwm
+    hardware_gpio
 )
 # Define onde estão os headers (arquivos .h) desta biblioteca
 target_include_directories(setup_utils PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

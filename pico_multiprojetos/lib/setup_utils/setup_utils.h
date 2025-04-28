@@ -2,7 +2,7 @@
 #define SETUP_UTILS_H
 
 // Include necessary headers
-#include <stdio.h>
+#include <stdio.h> 
 #include "hardware/i2c.h"
 
 // Definições de pinagem
@@ -16,10 +16,15 @@
 #define RED_LED_PIN 13   // LED vermelho
 #define GREEN_LED_PIN 11 // LED verde
 
+#define BUZZER_PIN_1 21   // Buzzer 1
+#define BUZZER_PIN_2 22 // Buzzer 2
+#define BUZZER_FREQ 100 // Frequência do buzzer
+
 // Declaração de funções para configuração do sistema e periféricos
 // -----------------------------------------------------------------------------------
 void iniciar_botao(uint pin); // Inicializa o botão na porta especificada
 void iniciar_led(uint pin); // Inicializa o LED na porta especificada
 void iniciar_i2c(i2c_inst_t *i2c, uint sda_pin, uint scl_pin, uint baudrate_khz); // Inicializa a interface I2C
+void iniciar_buzzer(uint pin); // Inicializa o buzzer na porta especificada
 
 #endif // SETUP_UTILS_H
