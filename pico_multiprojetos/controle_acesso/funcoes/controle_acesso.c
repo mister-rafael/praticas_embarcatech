@@ -7,6 +7,7 @@
 
 // Definições de variáveis
 const int senha_correta[4] = {1, 2, 3, 4}; // Senha correta para acesso
+int tentativas_incorretas = 0;             // Contador de tentativas incorretas
 int senha_digitada[4] = {0, 0, 0, 0};      // Senha digitada pelo usuário
 int posicao_atual = 0;                     // Posição atual da senha
 bool senhaInserida = false;                // Flag para verificar se a senha foi inserida
@@ -70,7 +71,14 @@ void som_sucesso(uint pin)
     // Beep longo
     beep(pin, 500); // Beep de 500 ms
 }
-
+// Função som alarme
+void som_alarme(uint pin){
+    for (int i = 0; i < 10; i++)
+    {                   // 10 beeps rápidos
+        beep(pin, 100); // Beep de 100 ms
+        sleep_ms(100);  // Pausa de 100 ms
+    }
+}
 // Exibir os dígitos da senha e destacar o atual
 void coletar_senha(uint8_t *buffer, struct render_area *area)
 {
@@ -96,7 +104,7 @@ void digitar_senha(uint8_t *buffer, struct render_area *area)
     if (gpio_get(BUTTON_A_PIN) == 0)
     {
         senha_digitada[posicao_atual] = (senha_digitada[posicao_atual] + 1) % 10; // Incrementar o número
-        beep(BUZZER_PIN_1, 80); // Emite um beep curto de 100 ms
+        beep(BUZZER_PIN_1, 80);                                                   // Emite um beep curto de 100 ms
         coletar_senha(buffer, area);                                              // Atualizar a exibição
         sleep_ms(300);
     }
@@ -129,21 +137,37 @@ void verificar_senha(uint8_t *buffer, struct render_area *area)
     limpar_display(buffer, area);
     if (correct)
     {
-        ssd1306_draw_string(buffer, 0, 48, "Acesso Permitido");
-        som_sucesso(BUZZER_PIN_1);    // Toca o som de sucesso
+        // Se a senha estiver correta, liga o LED verde e toca o som de sucesso
         gpio_put(BLUE_LED_PIN, 0);  // Desliga o LED azul
         gpio_put(GREEN_LED_PIN, 1); // Liga o LED verde
         gpio_put(RED_LED_PIN, 0);   // Desliga o LED vermelho
+        ssd1306_draw_string(buffer, 0, 32, "Acesso Permitido");
+        render_on_display(buffer, area); // Atualiza o display OLED com os dados do buffer.
+        som_sucesso(BUZZER_PIN_1);       // Toca o som de sucesso
+
+        tentativas_incorretas = 0; // Reseta o contador de tentativas incorretas
     }
-    else
-    {
-        ssd1306_draw_string(buffer, 0, 48, "Acesso negado");
-        beep(BUZZER_PIN_1, 500);    // Toca o som de erro
+    else{
         gpio_put(BLUE_LED_PIN, 0);  // Desliga o LED azul
         gpio_put(GREEN_LED_PIN, 0); // Desliga o LED verde
         gpio_put(RED_LED_PIN, 1);   // Liga o LED vermelho
+        beep(BUZZER_PIN_1, 500);    // Toca o som de erro
+        ssd1306_draw_string(buffer, 0, 32, "Acesso negado");
+        tentativas_incorretas++;         // Incrementa o contador de tentativas incorretas
+
+        // Se o número de tentativas incorretas for maior ou igual a 2, toca o alarme
+        // e reseta o contador de tentativas incorretas
+        if (tentativas_incorretas >= 2)
+        {
+            sleep_ms(500); // Pausa de 500 ms
+            limpar_display(buffer, area);
+            som_alarme(BUZZER_PIN_1);     // Toca o alarme contínuo            
+            ssd1306_draw_string(buffer, 0, 32, " Nº Tentativas  ");
+            ssd1306_draw_string(buffer, 0, 48, "    excedidas   ");
+            tentativas_incorretas = 0;       // Reseta o contador de tentativas incorretas
+        }
     }
-    render_on_display(buffer, area);
+    render_on_display(buffer, area); // Atualiza o display OLED com os dados do buffer.
 }
 // Reinicia a entrada da senha para uma nova tentativa
 void resetar_entrada(uint8_t *buffer, struct render_area *area)
