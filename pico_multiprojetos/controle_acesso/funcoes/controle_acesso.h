@@ -10,6 +10,8 @@
 // Declaração dos protótipos das funções antes do setup()
 void setup_program();
 
+
+
 void limpar_display(uint8_t *buffer, struct render_area *area);
 void exibir_messagem(uint8_t *buffer, struct render_area *area);
 

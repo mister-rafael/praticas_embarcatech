@@ -23,10 +23,11 @@ target_include_directories(controle_acesso PRIVATE
 # Liga o executável com as bibliotecas necessárias
 target_link_libraries(controle_acesso
     pico_stdlib
-    setup_utils
-    oled
-    io_utils
-    
+    hardware_pwm # Necessário para PWM
+    hardware_gpio # Necessário para GPIO
+    setup_utils # Biblioteca de setup_utils
+    oled # Biblioteca de OLED
+    io_utils    # Biblioteca de io_utils
 )
 
 # Gera arquivos .uf2, .bin, etc.

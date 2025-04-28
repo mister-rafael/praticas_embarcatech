@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "setup_utils.h"
-#include "actions_io.h" // Biblioteca de ações de entrada e saída.
+#include "actions_io.h"      // Biblioteca de ações de entrada e saída.
 #include "controle_acesso.h" // Biblioteca de controle de acesso.
 #include "ssd1306.h"         //Biblioteca específica para controlar o display OLED SSD1306.
 
@@ -30,6 +30,10 @@ void setup_program()
     iniciar_led(GREEN_LED_PIN); // Inicializa o LED verde
     iniciar_led(BLUE_LED_PIN);  // Inicializa o LED azul
 
+    // Inicialização do buzzer
+    iniciar_buzzer(BUZZER_PIN_1); // Inicializa o buzzer 1
+    iniciar_buzzer(BUZZER_PIN_2); // Inicializa o buzzer 2
+
     // Inicialmente, desligar o LED RGB
     desligar_led(RED_LED_PIN);   // Desliga o LED vermelho
     desligar_led(GREEN_LED_PIN); // Desliga o LED verde
@@ -52,6 +56,21 @@ void exibir_messagem(uint8_t *buffer, struct render_area *area)
     render_on_display(buffer, area);
     coletar_senha(buffer, area);
 }
+// Função som sucesso
+void som_sucesso(uint pin)
+{
+    // Primeiro beep curto
+    beep(pin, 200); // Beep de 200 ms
+    sleep_ms(100);  // Pausa de 100 ms
+
+    // Segundo beep curto
+    beep(pin, 200); // Beep de 200 ms
+    sleep_ms(100);  // Pausa de 100 ms
+
+    // Beep longo
+    beep(pin, 500); // Beep de 500 ms
+}
+
 // Exibir os dígitos da senha e destacar o atual
 void coletar_senha(uint8_t *buffer, struct render_area *area)
 {
@@ -77,6 +96,7 @@ void digitar_senha(uint8_t *buffer, struct render_area *area)
     if (gpio_get(BUTTON_A_PIN) == 0)
     {
         senha_digitada[posicao_atual] = (senha_digitada[posicao_atual] + 1) % 10; // Incrementar o número
+        beep(BUZZER_PIN_1, 80); // Emite um beep curto de 100 ms
         coletar_senha(buffer, area);                                              // Atualizar a exibição
         sleep_ms(300);
     }
@@ -110,6 +130,7 @@ void verificar_senha(uint8_t *buffer, struct render_area *area)
     if (correct)
     {
         ssd1306_draw_string(buffer, 0, 48, "Acesso Permitido");
+        som_sucesso(BUZZER_PIN_1);    // Toca o som de sucesso
         gpio_put(BLUE_LED_PIN, 0);  // Desliga o LED azul
         gpio_put(GREEN_LED_PIN, 1); // Liga o LED verde
         gpio_put(RED_LED_PIN, 0);   // Desliga o LED vermelho
@@ -117,6 +138,7 @@ void verificar_senha(uint8_t *buffer, struct render_area *area)
     else
     {
         ssd1306_draw_string(buffer, 0, 48, "Acesso negado");
+        beep(BUZZER_PIN_1, 500);    // Toca o som de erro
         gpio_put(BLUE_LED_PIN, 0);  // Desliga o LED azul
         gpio_put(GREEN_LED_PIN, 0); // Desliga o LED verde
         gpio_put(RED_LED_PIN, 1);   // Liga o LED vermelho

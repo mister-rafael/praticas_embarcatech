@@ -12,33 +12,6 @@
 #include "actions_io.h"              //Biblioteca de ações de entrada e saída.
 #include "funcoes/controle_acesso.h" //Biblioteca de controle de acesso.
 
-/*void setup_program()
-{
-    stdio_init_all(); // Inicializa os tipos stdio padrão presentes ligados ao binário
-
-    // Inicialização do i2c usando a função da biblioteca setup_utils
-    iniciar_i2c(i2c1, PIN_SDA, PIN_SCL, ssd1306_i2c_clock);
-    // Inicialização do display OLED SSD1306
-    ssd1306_init(); // inicializa o display com o endereço I2C do display, que geralmente é 0x3C ou 0x3D.
-
-    // Inicialização dos botões A e B.
-    iniciar_botao(BUTTON_A_PIN); // Inicializa o botão A
-    iniciar_botao(BUTTON_B_PIN); // Inicializa o botão B
-
-    // Inicialização dos LeD RGB
-    iniciar_led(RED_LED_PIN);   // Inicializa o LED vermelho
-    iniciar_led(GREEN_LED_PIN); // Inicializa o LED verde
-    iniciar_led(BLUE_LED_PIN);  // Inicializa o LED azul
-
-    // Inicialmente, desligar o LED RGB
-    desligar_led(RED_LED_PIN);   // Desliga o LED vermelho
-    desligar_led(GREEN_LED_PIN); // Desliga o LED verde
-    desligar_led(BLUE_LED_PIN);  // Desliga o LED azul
-
-    // exibir_messagem(ssd,&frame_area); // Exibir tela inicial para digitação da senha
-    ligar_led(BLUE_LED_PIN); // Liga o LED azul para indicar que o sistema está pronto
-}*/
-
 // Função principal do programa
 // Esta função é chamada quando o programa é iniciado
 int main()
