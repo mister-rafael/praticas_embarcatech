@@ -80,3 +80,6 @@ add_subdirectory(controle_acesso)
 
 # Adiciona o subdiretório do projeto1
 add_subdirectory(projeto1)
+
+# Adiciona o subdiretório do projeto buzzer
+add_subdirectory(buzzer)
