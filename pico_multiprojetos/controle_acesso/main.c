@@ -29,18 +29,50 @@ int main()
     uint8_t ssd[ssd1306_buffer_length];               // É um buffer que armazena a imagem/tela antes de ser enviada para o OLED.
 
     // zera o display inteiro
-    limpar_display(ssd, &frame_area); // Chama a função para limpar a tela
+    //limpar_display(ssd, &frame_area); // Chama a função para limpar a tela
 
-restart: // Rótulo para reiniciar o loop
-
-    // Parte do código para exibir a mensagem no display (opcional: mudar ssd1306_height para 32 em ssd1306_i2c.h)
-    exibir_messagem(ssd, &frame_area); // Exibir tela inicial para digitação da senha
+restart:            // Rótulo para reiniciar o loop
+    int opcao = 0; // opcao inicial: display apagado
     while (true)
     {
-        // Chama a função loop para lidar com a entrada do usuário e verificar a senha
-        loop(ssd, &frame_area);
-        // Aguarda 10ms para evitar sobrecarga do processador
-        sleep_ms(10);
+        switch (opcao)
+        {
+        case 0: // Display apagado, aguardando interação
+            // Desliga os LEDs e o display
+            limpar_display(ssd, &frame_area); // Chama a função para limpar a tela
+            if (gpio_get(BUTTON_A_PIN) == 0)
+            {
+                sleep_ms(300); // Debounce
+                opcao = 1;    // Ir para a tela de inserir senha
+                break; // Sai do switch para evitar que o opcao mude novamente
+            }
+        case 1: // Display ligado, aguardando interação
+            // Parte do código para exibir a mensagem no display (opcional: mudar ssd1306_height para 32 em ssd1306_i2c.h)
+            exibir_messagem(ssd, &frame_area, "Digite a senha"); // Exibir tela inicial para digitação da senha
+            // Função para coletar a senha digitada pelo usuário
+            coletar_senha(ssd, &frame_area); // Coletar a senha digitada pelo usuário
+            //Loop para lidar com a entrada do usuário
+            loop(ssd, &frame_area);
+            // Aguarda 10ms para evitar sobrecarga do processador
+            sleep_ms(10);
+            opcao = 0; // Retorna ao opcao inicial
+            break;
+
+        case 2: // Mensagem de deslogado
+            if (gpio_get(BUTTON_B_PIN) == 0 && opcao == 1)
+            {
+                sleep_ms(300); // Debounce
+                opcao = 2;    // Ir para a tela de inserir senha
+            }
+            else if (gpio_get(BUTTON_B_PIN) == 0)
+            {
+                sleep_ms(300); // Debounce
+                opcao = 0;    // Exibir mensagem de deslogado
+            }
+            break;
+        default: // Garante que o opcao volte ao inicial
+            printf("Opção inválida.\n");
+        }
     }
 
     return 0; // Retorna 0 para indicar que o programa terminou corretamente

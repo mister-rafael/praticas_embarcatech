@@ -11,7 +11,7 @@ int tentativas_incorretas = 0;             // Contador de tentativas incorretas
 int senha_digitada[4] = {0, 0, 0, 0};      // Senha digitada pelo usuário
 int posicao_atual = 0;                     // Posição atual da senha
 bool senhaInserida = false;                // Flag para verificar se a senha foi inserida
-
+bool estado = false;                  // Estado do sistema (logado ou deslogado)
 // Função de configuração do programa
 void setup_program()
 {
@@ -50,12 +50,19 @@ void limpar_display(uint8_t *buffer, struct render_area *area)
     render_on_display(buffer, area);          // Atualiza o display OLED com os dados do buffer.
 }
 // Exibir mensagem inicial no display
-void exibir_messagem(uint8_t *buffer, struct render_area *area)
+void exibir_messagem(uint8_t *buffer, struct render_area *area, char *mensagem)
 {
     limpar_display(buffer, area); // Limpa todo o display, antes de exibir.
-    ssd1306_draw_string(buffer, 10, 10, "Digite a senha:");
+    ssd1306_draw_string(buffer, 10, 10, mensagem);
     render_on_display(buffer, area);
-    coletar_senha(buffer, area);
+}
+// Função para obter o estado atual do sistema (logado ou deslogado)
+bool get_estado() {
+    return estado;
+}
+// Função para definir o estado do sistema (logado ou deslogado)
+void set_estado(bool novo_estado) {
+    estado = novo_estado;
 }
 // Função som sucesso
 void som_sucesso(uint pin)
@@ -146,6 +153,7 @@ void verificar_senha(uint8_t *buffer, struct render_area *area)
         som_sucesso(BUZZER_PIN_1);       // Toca o som de sucesso
 
         tentativas_incorretas = 0; // Reseta o contador de tentativas incorretas
+        set_estado(true); // Altera o estado para logado
     }
     else{
         gpio_put(BLUE_LED_PIN, 0);  // Desliga o LED azul
@@ -154,7 +162,7 @@ void verificar_senha(uint8_t *buffer, struct render_area *area)
         beep(BUZZER_PIN_1, 500);    // Toca o som de erro
         ssd1306_draw_string(buffer, 0, 32, "Acesso negado");
         tentativas_incorretas++;         // Incrementa o contador de tentativas incorretas
-
+        //estado = false;          // Altera o estado para deslogado
         // Se o número de tentativas incorretas for maior ou igual a 2, toca o alarme
         // e reseta o contador de tentativas incorretas
         if (tentativas_incorretas >= 2)
@@ -165,6 +173,7 @@ void verificar_senha(uint8_t *buffer, struct render_area *area)
             ssd1306_draw_string(buffer, 0, 32, " Nº Tentativas  ");
             ssd1306_draw_string(buffer, 0, 48, "    excedidas   ");
             tentativas_incorretas = 0;       // Reseta o contador de tentativas incorretas
+            //estado = false;          // Altera o estado para deslogado
         }
     }
     render_on_display(buffer, area); // Atualiza o display OLED com os dados do buffer.
@@ -181,7 +190,7 @@ void resetar_entrada(uint8_t *buffer, struct render_area *area)
     }
     posicao_atual = 0;
     senhaInserida = false;
-    exibir_messagem(buffer, area);
+    exibir_messagem(buffer, area, "Digite a senha"); // Exibe a mensagem inicial
 }
 // Loop principal
 void loop(uint8_t *buffer, struct render_area *area)

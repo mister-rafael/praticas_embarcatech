@@ -10,7 +10,7 @@
 // Declaração dos protótipos das funções antes do setup()
 void setup_program();
 void limpar_display(uint8_t *buffer, struct render_area *area);
-void exibir_messagem(uint8_t *buffer, struct render_area *area);
+void exibir_messagem(uint8_t *buffer, struct render_area *area, char *mensagem);
 void som_sucesso(uint pin);
 void som_alarme(uint pin);
 void coletar_senha(uint8_t *buffer, struct render_area *area);
