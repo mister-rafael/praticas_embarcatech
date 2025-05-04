@@ -70,6 +70,7 @@ pico_sdk_init()
 add_subdirectory(lib/io_utils)
 add_subdirectory(lib/lib_oled)
 add_subdirectory(lib/setup_utils)
+add_subdirectory(lib/matriz_utils)
 
 # Adiciona os programas (executáveis)
 # Basicamente, ler o Cmakelist dentro da pasta
@@ -77,9 +78,6 @@ add_subdirectory(pisca_led)
 add_subdirectory(mensagem_serial)
 add_subdirectory(pratica_rtos)
 add_subdirectory(controle_acesso)
+add_subdirectory(joystick)
+add_subdirectory(matriz_led_app)
 
-# Adiciona o subdiretório do projeto1
-add_subdirectory(projeto1)
-
-# Adiciona o subdiretório do projeto buzzer
-add_subdirectory(buzzer)
