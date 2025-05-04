@@ -46,3 +46,5 @@ void iniciar_buzzer(uint pin) {
     // Define o nível do pino como 0 (desligado)
     pwm_set_gpio_level(pin, 0); 
 }
+
+// FUNÇÃO PARA INICIAR A MATRIZ DE LED

@@ -9,13 +9,16 @@
 #define PIN_SDA 14 // Pino de dados do I2C
 #define PIN_SCL 15 // Pino de clock do I2C
 
+// Definições de pinos para botões
 #define BUTTON_A_PIN 5 // Botão A
 #define BUTTON_B_PIN 6 // Botão B
 
+// Definições de pinos para LEDs RGB
 #define BLUE_LED_PIN 12  // LED azul
 #define RED_LED_PIN 13   // LED vermelho
 #define GREEN_LED_PIN 11 // LED verde
 
+// Definições de pinos para o buzzer
 #define BUZZER_PIN_1 21   // Buzzer 1
 #define BUZZER_PIN_2 22 // Buzzer 2
 #define BUZZER_FREQ 100 // Frequência do buzzer
