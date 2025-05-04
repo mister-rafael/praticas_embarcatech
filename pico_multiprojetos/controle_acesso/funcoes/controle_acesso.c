@@ -190,6 +190,7 @@ void resetar_entrada(uint8_t *buffer, struct render_area *area)
     }
     posicao_atual = 0;
     senhaInserida = false;
+    //limpar_display(buffer, area); // Limpa o display
     exibir_messagem(buffer, area, "Digite a senha"); // Exibe a mensagem inicial
 }
 // Loop principal

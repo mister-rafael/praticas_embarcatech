@@ -29,51 +29,48 @@ int main()
     uint8_t ssd[ssd1306_buffer_length];               // É um buffer que armazena a imagem/tela antes de ser enviada para o OLED.
 
     // zera o display inteiro
-    //limpar_display(ssd, &frame_area); // Chama a função para limpar a tela
+    limpar_display(ssd, &frame_area); // Chama a função para limpar a tela
 
-restart:            // Rótulo para reiniciar o loop
-    int opcao = 0; // opcao inicial: display apagado
+restart: // Rótulo para reiniciar o loop
+    // Exibe a mensagem inicial para digitar a senha
+    exibir_messagem(ssd, &frame_area, "Digite a senha"); // Exibe a mensagem inicial para digitar a senha
+    coletar_senha(ssd, &frame_area);                     // Chama a função para coletar a senha
     while (true)
     {
-        switch (opcao)
-        {
-        case 0: // Display apagado, aguardando interação
-            // Desliga os LEDs e o display
-            limpar_display(ssd, &frame_area); // Chama a função para limpar a tela
-            if (gpio_get(BUTTON_A_PIN) == 0)
-            {
-                sleep_ms(300); // Debounce
-                opcao = 1;    // Ir para a tela de inserir senha
-                break; // Sai do switch para evitar que o opcao mude novamente
-            }
-        case 1: // Display ligado, aguardando interação
-            // Parte do código para exibir a mensagem no display (opcional: mudar ssd1306_height para 32 em ssd1306_i2c.h)
-            exibir_messagem(ssd, &frame_area, "Digite a senha"); // Exibir tela inicial para digitação da senha
-            // Função para coletar a senha digitada pelo usuário
-            coletar_senha(ssd, &frame_area); // Coletar a senha digitada pelo usuário
-            //Loop para lidar com a entrada do usuário
-            loop(ssd, &frame_area);
-            // Aguarda 10ms para evitar sobrecarga do processador
-            sleep_ms(10);
-            opcao = 0; // Retorna ao opcao inicial
-            break;
-
-        case 2: // Mensagem de deslogado
-            if (gpio_get(BUTTON_B_PIN) == 0 && opcao == 1)
-            {
-                sleep_ms(300); // Debounce
-                opcao = 2;    // Ir para a tela de inserir senha
-            }
-            else if (gpio_get(BUTTON_B_PIN) == 0)
-            {
-                sleep_ms(300); // Debounce
-                opcao = 0;    // Exibir mensagem de deslogado
-            }
-            break;
-        default: // Garante que o opcao volte ao inicial
-            printf("Opção inválida.\n");
-        }
+        loop(ssd, &frame_area);
+        sleep_ms(10);
     }
 
+    //============================================================================================================================
+    // PARTE EM DESENVOLVIMENTO
+    /*while (true)
+    {
+        int opcao = -1;                  // opcao inicial: display apagado
+        if (gpio_get(BUTTON_A_PIN) == 0) // Verifica se o botão A foi pressionado
+        {
+            opcao = 0; // Se o botão A foi pressionado, define a opção como 0
+        }
+        else if (gpio_get(BUTTON_B_PIN) == 0) // Verifica se o botão B foi pressionado
+        {
+            opcao = 1; // Se o botão B foi pressionado, define a opção como 1
+        }
+
+        switch (opcao) // Verifica a opção selecionada
+        {
+        case 0:                                                  // Se a opção for 0, exibe a mensagem inicial
+            exibir_messagem(ssd, &frame_area, "Digite a senha"); // Exibe a mensagem inicial para digitar a senha
+            coletar_senha(ssd, &frame_area);
+            loop(ssd, &frame_area);
+            sleep_ms(10);
+            break;
+        case 1: // Se a opção for 1, exibe a mensagem de erro
+            limpar_display(ssd, &frame_area); // Limpa o display
+            break;
+        default:
+            break;
+        }
+        sleep_ms(100); // Aguarda 100 ms antes de verificar novamente
+    }*/
+    //============================================================================================================================
     return 0; // Retorna 0 para indicar que o programa terminou corretamente
 }
