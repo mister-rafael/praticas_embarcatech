@@ -12,7 +12,7 @@
 
 // ========== CONFIGURAÇÕES ======================== //
 #define HOST "192.168.0.20" // IP do servidor de casa
-// #define HOST "10.3.10.102" // IP do servidor do IFPI
+// #define HOST "10.3.10.92" // IP do servidor do IFPI
 #define PORT 5000        // Porta do servidor
 #define INTERVALO_MS 500 // Intervalo de verificação do botão (em milissegundos)
 
@@ -53,7 +53,29 @@ void enviar_dados_joystick(uint16_t x, uint16_t y)
     {
         printf("Erro ao enviar dados: %d\n", result);
     }
-    sleep_ms(20); // Evita múltiplos envios rápidos
+    sleep_ms(10); // Evita múltiplos envios rápidos
+}
+// Função para enviar os dados de um botão pressionado
+void enviar_dados_botao(const char *caminho)
+{
+    EXAMPLE_HTTP_REQUEST_T req = {0}; // Inicializa a estrutura de requisição
+    req.hostname = HOST;
+    req.url = caminho; // Define o caminho do comando
+    req.port = PORT;
+    req.headers_fn = http_client_header_print_fn;
+    req.recv_fn = http_client_receive_print_fn;
+
+    printf("Enviando comando: %s\n", caminho);
+    int result = http_client_request_sync(cyw43_arch_async_context(), &req);
+
+    if (result == 0)
+    {
+        printf("Dados enviados com sucesso!\n");
+    }
+    else
+    {
+        printf("Erro ao enviar dados: %d\n", result);
+    }
 }
 int main()
 {
@@ -77,80 +99,86 @@ int main()
         return 1; // Sai do programa em caso de erro
     }
     // Loop Principal
-    int button_a_state = 1; // Variável para controlar o estado do botão A (1 = solto, 0 = pressionado)
-    int button_b_state = 1; // Variável para controlar o estado do botão B (1 = solto, 0 = pressionado)
+    // Variável para controlar o estado do botão A (1 = solto, 0 = pressionado)
+    int button_a_state = 1;
+    // Variável para controlar o estado do botão B (1 = solto, 0 = pressionado)
+    int button_b_state = 1;
 
+    // O loop principal do programa, onde as ações são realizadas continuamente
     while (1)
     {
-        const char *path_a = NULL;
-        const char *path_b = NULL;
-        const char *path_joystik = NULL;
+        const char *path_a = NULL;       // Variável para armazenar o caminho do botão A
+        const char *path_b = NULL;       // Variável para armazenar o caminho do botão  B
+        const char *path_joystik = NULL; // Variável para armazenar o caminho do joystick
 
         // Se o botão A for apertado
         if (gpio_get(BUTTON_A) == 0)
         {
-            if (button_a_state == 1)
-            {                        // Se o botão estava solto e agora foi pressionado
-                path_a = "/CLICK_A"; // Envia a mensagem "CLICK"
-                gpio_put(LED_RED, 1);
-                button_a_state = 0; // Atualiza o estado para pressionado
+            if (button_a_state == 1) // Se o botão estava solto e agora foi pressionado
+            {                         
+                path_a = "/CLICK_A";  // Envia a mensagem "CLICK"
+                gpio_put(LED_RED, 1); // Liga o LED vermelho
+                button_a_state = 0;   // Atualiza o estado para pressionado
             }
         }
+        // Se o botão A for solto
         else
         {
-            if (button_a_state == 0)
-            {                        // Se o botão estava pressionado e agora foi solto
-                path_a = "/SOLTO_A"; // Envia a mensagem "SOLTO"
-                gpio_put(LED_RED, 0);
-                button_a_state = 1; // Atualiza o estado para solto
+            if (button_a_state == 0) // Se o botão estava pressionado e agora foi solto
+            {
+                path_a = "/SOLTO_A";  // Envia a mensagem "SOLTO"
+                gpio_put(LED_RED, 0); // Desliga o LED vermelho
+                button_a_state = 1;   // Atualiza o estado para solto
             }
         }
         // Se o botão B for apertado
         if (gpio_get(BUTTON_B) == 0)
         {
-            if (button_b_state == 1)
-            {                        // Se o botão estava solto e agora foi pressionado
-                path_b = "/CLICK_B"; // Envia a mensagem "CLICK"
-                gpio_put(LED_GREEN, 1);
-                button_b_state = 0; // Atualiza o estado para pressionado
+            if (button_b_state == 1)    // Se o botão estava solto e agora foi pressionado
+            {
+                path_b = "/CLICK_B";    // Envia a mensagem "CLICK"
+                gpio_put(LED_GREEN, 1); // Liga o LED verde
+                button_b_state = 0;     // Atualiza o estado para pressionado
             }
         }
+        // Se o botão B for solto
         else
         {
-            if (button_b_state == 0)
-            {                        // Se o botão estava pressionado e agora foi solto
-                path_b = "/SOLTO_B"; // Envia a mensagem "SOLTO"
-                gpio_put(LED_GREEN, 0);
-                button_b_state = 1; // Atualiza o estado para solto
+            if (button_b_state == 0)    // Se o botão estava pressionado e agora foi solto
+            {
+                path_b = "/SOLTO_B";    // Envia a mensagem "SOLTO"
+                gpio_put(LED_GREEN, 0); // Desliga o LED verde
+                button_b_state = 1;     // Atualiza o estado para solto
             }
         }
-        // Envia os comandos para o servidor
+        // Envia o comando para o servidor Flask se o botão A ou B for pressionado
         if (path_a != NULL)
         {
-            EXAMPLE_HTTP_REQUEST_T req = {0}; // Inicializa a estrutura de requisição
-            req.hostname = HOST;
-            req.url = path_a;
-            req.port = PORT;
-            req.headers_fn = http_client_header_print_fn;
-            req.recv_fn = http_client_receive_print_fn;
+            /*EXAMPLE_HTTP_REQUEST_T req = {0}; // Inicializa a estrutura de requisição
+            req.hostname = HOST; // Define o hostname do servidor
+            req.url = path_a; // Define o caminho do comando
+            req.port = PORT; // Define a porta do servidor
+            req.headers_fn = http_client_header_print_fn; // Define a função de callback para os cabeçalhos
+            req.recv_fn = http_client_receive_print_fn; // Define a função de callback para o recebimento da resposta
 
-            printf("Enviando comando: %s\n", path_a);
-            int result = http_client_request_sync(cyw43_arch_async_context(), &req);
+            printf("Enviando comando: %s\n", path_a); // Imprime o comando que está sendo enviado
+            int result = http_client_request_sync(cyw43_arch_async_context(), &req); // Envia a requisição HTTP de forma síncrona
 
-            if (result == 0)
+            if (result == 0) // Verifica se o envio foi bem-sucedido
+            // Se o resultado for 0, significa que o comando foi enviado com sucesso
             {
                 printf("Comando enviado com sucesso!\n");
             }
             else
             {
                 printf("Erro ao enviar comando: %d\n", result);
-            }
-
+            }*/
+            enviar_dados_botao(path_a); // Envia os dados do botão A
             sleep_ms(20); // Evita múltiplos envios rápidos
         }
         if (path_b != NULL)
         {
-            EXAMPLE_HTTP_REQUEST_T req = {0}; // Inicializa a estrutura de requisição
+            /*EXAMPLE_HTTP_REQUEST_T req = {0}; // Inicializa a estrutura de requisição
             req.hostname = HOST;
             req.url = path_b;
             req.port = PORT;
@@ -167,8 +195,8 @@ int main()
             else
             {
                 printf("Erro ao enviar comando: %d\n", result);
-            }
-
+            }*/
+            enviar_dados_botao(path_b); // Envia os dados do botão B
             sleep_ms(20); // Evita múltiplos envios rápidos
         }
 
@@ -220,6 +248,8 @@ int main()
             gpio_put(LED_BLUE, 0);
             enviar_dados_joystick(x, y);
         }
-        sleep_ms(INTERVALO_MS); // Aguarda o intervalo definido antes de verificar novamente
+
+        // Aguarda o intervalo definido antes de verificar novamente
+        sleep_ms(INTERVALO_MS);
     }
 }
