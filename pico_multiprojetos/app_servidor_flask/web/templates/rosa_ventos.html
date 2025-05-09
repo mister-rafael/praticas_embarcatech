@@ -1,0 +1,862 @@
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rosa dos Ventos Minimalista</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #2c3e50, #bdc3c7, #2c3e50);
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+        }
+
+        .compass-container {
+            position: relative;
+            width: 80vmin;
+            height: 80vmin;
+            max-width: 500px;
+            max-height: 500px;
+        }
+
+        .compass-rose {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(5px);
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .compass-star {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 70%;
+            height: 70%;
+            transform-origin: center;
+            transform: translate(-50%, -50%) rotate(0deg);
+            z-index: 10;
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .compass-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 10%;
+            height: 10%;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 15;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+
+        .direction {
+            position: absolute;
+            font-weight: 600;
+            font-size: clamp(0.8rem, 3vmin, 1.2rem);
+            color: rgba(255, 255, 255, 0.9);
+            z-index: 5;
+        }
+
+        .direction.north {
+            top: 5%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .direction.east {
+            top: 50%;
+            right: 5%;
+            transform: translateY(-50%);
+        }
+
+        .direction.south {
+            bottom: 5%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .direction.west {
+            top: 50%;
+            left: 5%;
+            transform: translateY(-50%);
+        }
+
+        .cardinal-line {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.6);
+            top: 50%;
+            left: 50%;
+            transform-origin: center;
+            z-index: 1;
+        }
+
+        .cardinal-line.vertical {
+            width: 1px;
+            height: 90%;
+            transform: translate(-50%, -50%);
+        }
+
+        .cardinal-line.horizontal {
+            width: 90%;
+            height: 1px;
+            transform: translate(-50%, -50%);
+        }
+
+        .intercardinal-line {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.3);
+            top: 50%;
+            left: 50%;
+            width: 1px;
+            height: 90%;
+            transform-origin: center;
+            z-index: 1;
+        }
+
+        .intercardinal-line.ne-sw {
+            transform: translate(-50%, -50%) rotate(45deg);
+        }
+
+        .intercardinal-line.nw-se {
+            transform: translate(-50%, -50%) rotate(-45deg);
+        }
+
+        .angle-display {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 20;
+        }
+
+        @media (max-width: 640px) {
+            .controls {
+                flex-direction: column;
+                bottom: 10px;
+                gap: 5px;
+            }
+        }
+
+        .control-btn {
+            background-color: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            backdrop-filter: blur(5px);
+        }
+
+        .control-btn:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .degree-marks {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+        }
+
+        .degree-mark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 1px;
+            height: 6px;
+            background-color: rgba(255, 255, 255, 0.3);
+            transform-origin: center bottom;
+        }
+
+        .degree-mark.major {
+            height: 12px;
+            width: 2px;
+            background-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .outer-ring {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-sizing: border-box;
+        }
+    </style>
+    <style>
+        *,
+        ::before,
+        ::after {
+            --tw-border-spacing-x: 0;
+            --tw-border-spacing-y: 0;
+            --tw-translate-x: 0;
+            --tw-translate-y: 0;
+            --tw-rotate: 0;
+            --tw-skew-x: 0;
+            --tw-skew-y: 0;
+            --tw-scale-x: 1;
+            --tw-scale-y: 1;
+            --tw-pan-x: ;
+            --tw-pan-y: ;
+            --tw-pinch-zoom: ;
+            --tw-scroll-snap-strictness: proximity;
+            --tw-gradient-from-position: ;
+            --tw-gradient-via-position: ;
+            --tw-gradient-to-position: ;
+            --tw-ordinal: ;
+            --tw-slashed-zero: ;
+            --tw-numeric-figure: ;
+            --tw-numeric-spacing: ;
+            --tw-numeric-fraction: ;
+            --tw-ring-inset: ;
+            --tw-ring-offset-width: 0px;
+            --tw-ring-offset-color: #fff;
+            --tw-ring-color: rgb(59 130 246 / 0.5);
+            --tw-ring-offset-shadow: 0 0 #0000;
+            --tw-ring-shadow: 0 0 #0000;
+            --tw-shadow: 0 0 #0000;
+            --tw-shadow-colored: 0 0 #0000;
+            --tw-blur: ;
+            --tw-brightness: ;
+            --tw-contrast: ;
+            --tw-grayscale: ;
+            --tw-hue-rotate: ;
+            --tw-invert: ;
+            --tw-saturate: ;
+            --tw-sepia: ;
+            --tw-drop-shadow: ;
+            --tw-backdrop-blur: ;
+            --tw-backdrop-brightness: ;
+            --tw-backdrop-contrast: ;
+            --tw-backdrop-grayscale: ;
+            --tw-backdrop-hue-rotate: ;
+            --tw-backdrop-invert: ;
+            --tw-backdrop-opacity: ;
+            --tw-backdrop-saturate: ;
+            --tw-backdrop-sepia: ;
+            --tw-contain-size: ;
+            --tw-contain-layout: ;
+            --tw-contain-paint: ;
+            --tw-contain-style:
+        }
+
+        ::backdrop {
+            --tw-border-spacing-x: 0;
+            --tw-border-spacing-y: 0;
+            --tw-translate-x: 0;
+            --tw-translate-y: 0;
+            --tw-rotate: 0;
+            --tw-skew-x: 0;
+            --tw-skew-y: 0;
+            --tw-scale-x: 1;
+            --tw-scale-y: 1;
+            --tw-pan-x: ;
+            --tw-pan-y: ;
+            --tw-pinch-zoom: ;
+            --tw-scroll-snap-strictness: proximity;
+            --tw-gradient-from-position: ;
+            --tw-gradient-via-position: ;
+            --tw-gradient-to-position: ;
+            --tw-ordinal: ;
+            --tw-slashed-zero: ;
+            --tw-numeric-figure: ;
+            --tw-numeric-spacing: ;
+            --tw-numeric-fraction: ;
+            --tw-ring-inset: ;
+            --tw-ring-offset-width: 0px;
+            --tw-ring-offset-color: #fff;
+            --tw-ring-color: rgb(59 130 246 / 0.5);
+            --tw-ring-offset-shadow: 0 0 #0000;
+            --tw-ring-shadow: 0 0 #0000;
+            --tw-shadow: 0 0 #0000;
+            --tw-shadow-colored: 0 0 #0000;
+            --tw-blur: ;
+            --tw-brightness: ;
+            --tw-contrast: ;
+            --tw-grayscale: ;
+            --tw-hue-rotate: ;
+            --tw-invert: ;
+            --tw-saturate: ;
+            --tw-sepia: ;
+            --tw-drop-shadow: ;
+            --tw-backdrop-blur: ;
+            --tw-backdrop-brightness: ;
+            --tw-backdrop-contrast: ;
+            --tw-backdrop-grayscale: ;
+            --tw-backdrop-hue-rotate: ;
+            --tw-backdrop-invert: ;
+            --tw-backdrop-opacity: ;
+            --tw-backdrop-saturate: ;
+            --tw-backdrop-sepia: ;
+            --tw-contain-size: ;
+            --tw-contain-layout: ;
+            --tw-contain-paint: ;
+            --tw-contain-style:
+        }
+
+        /* ! tailwindcss v3.4.16 | MIT License | https://tailwindcss.com */
+        *,
+        ::after,
+        ::before {
+            box-sizing: border-box;
+            border-width: 0;
+            border-style: solid;
+            border-color: #e5e7eb
+        }
+
+        ::after,
+        ::before {
+            --tw-content: ''
+        }
+
+        :host,
+        html {
+            line-height: 1.5;
+            -webkit-text-size-adjust: 100%;
+            -moz-tab-size: 4;
+            tab-size: 4;
+            font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+            font-feature-settings: normal;
+            font-variation-settings: normal;
+            -webkit-tap-highlight-color: transparent
+        }
+
+        body {
+            margin: 0;
+            line-height: inherit
+        }
+
+        hr {
+            height: 0;
+            color: inherit;
+            border-top-width: 1px
+        }
+
+        abbr:where([title]) {
+            -webkit-text-decoration: underline dotted;
+            text-decoration: underline dotted
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            font-size: inherit;
+            font-weight: inherit
+        }
+
+        a {
+            color: inherit;
+            text-decoration: inherit
+        }
+
+        b,
+        strong {
+            font-weight: bolder
+        }
+
+        code,
+        kbd,
+        pre,
+        samp {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            font-feature-settings: normal;
+            font-variation-settings: normal;
+            font-size: 1em
+        }
+
+        small {
+            font-size: 80%
+        }
+
+        sub,
+        sup {
+            font-size: 75%;
+            line-height: 0;
+            position: relative;
+            vertical-align: baseline
+        }
+
+        sub {
+            bottom: -.25em
+        }
+
+        sup {
+            top: -.5em
+        }
+
+        table {
+            text-indent: 0;
+            border-color: inherit;
+            border-collapse: collapse
+        }
+
+        button,
+        input,
+        optgroup,
+        select,
+        textarea {
+            font-family: inherit;
+            font-feature-settings: inherit;
+            font-variation-settings: inherit;
+            font-size: 100%;
+            font-weight: inherit;
+            line-height: inherit;
+            letter-spacing: inherit;
+            color: inherit;
+            margin: 0;
+            padding: 0
+        }
+
+        button,
+        select {
+            text-transform: none
+        }
+
+        button,
+        input:where([type=button]),
+        input:where([type=reset]),
+        input:where([type=submit]) {
+            -webkit-appearance: button;
+            background-color: transparent;
+            background-image: none
+        }
+
+        :-moz-focusring {
+            outline: auto
+        }
+
+        :-moz-ui-invalid {
+            box-shadow: none
+        }
+
+        progress {
+            vertical-align: baseline
+        }
+
+        ::-webkit-inner-spin-button,
+        ::-webkit-outer-spin-button {
+            height: auto
+        }
+
+        [type=search] {
+            -webkit-appearance: textfield;
+            outline-offset: -2px
+        }
+
+        ::-webkit-search-decoration {
+            -webkit-appearance: none
+        }
+
+        ::-webkit-file-upload-button {
+            -webkit-appearance: button;
+            font: inherit
+        }
+
+        summary {
+            display: list-item
+        }
+
+        blockquote,
+        dd,
+        dl,
+        figure,
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        hr,
+        p,
+        pre {
+            margin: 0
+        }
+
+        fieldset {
+            margin: 0;
+            padding: 0
+        }
+
+        legend {
+            padding: 0
+        }
+
+        menu,
+        ol,
+        ul {
+            list-style: none;
+            margin: 0;
+            padding: 0
+        }
+
+        dialog {
+            padding: 0
+        }
+
+        textarea {
+            resize: vertical
+        }
+
+        input::placeholder,
+        textarea::placeholder {
+            opacity: 1;
+            color: #9ca3af
+        }
+
+        [role=button],
+        button {
+            cursor: pointer
+        }
+
+        :disabled {
+            cursor: default
+        }
+
+        audio,
+        canvas,
+        embed,
+        iframe,
+        img,
+        object,
+        svg,
+        video {
+            display: block;
+            vertical-align: middle
+        }
+
+        img,
+        video {
+            max-width: 100%;
+            height: auto
+        }
+
+        [hidden]:where(:not([hidden=until-found])) {
+            display: none
+        }
+    </style>
+</head>
+
+<body>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+    <div class="angle-display" id="angleDisplay">0°</div> <!-- Exibição do Angulo 
+    Atual -->
+
+    <div class="compass-container"> <!-- Contêiner da Rosa dos Ventos -->
+        <div class="compass-rose" id="compassRose">
+            <!-- Marcas de graus -->
+            <div class="degree-marks" id="degreeMarks">
+                <div class="degree-mark major" style="transform: rotate(0deg) translateX(-50%) translateY(-100%);">
+                </div>
+                <div class="degree-mark" style="transform: rotate(5deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark" style="transform: rotate(10deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark" style="transform: rotate(15deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark" style="transform: rotate(20deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark" style="transform: rotate(25deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark major" style="transform: rotate(30deg) translateX(-50%) translateY(-100%);">
+                </div>
+                <div class="degree-mark" style="transform: rotate(35deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark" style="transform: rotate(40deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark" style="transform: rotate(45deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark" style="transform: rotate(50deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark" style="transform: rotate(55deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark major" style="transform: rotate(60deg) translateX(-50%) translateY(-100%);">
+                </div>
+                <div class="degree-mark" style="transform: rotate(65deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark" style="transform: rotate(70deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark" style="transform: rotate(75deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark" style="transform: rotate(80deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark" style="transform: rotate(85deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark major" style="transform: rotate(90deg) translateX(-50%) translateY(-100%);">
+                </div>
+                <div class="degree-mark" style="transform: rotate(95deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark" style="transform: rotate(100deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark" style="transform: rotate(105deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark" style="transform: rotate(110deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark" style="transform: rotate(115deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark major" style="transform: rotate(120deg) translateX(-50%) translateY(-100%);">
+                </div>
+                <div class="degree-mark" style="transform: rotate(125deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark" style="transform: rotate(130deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark" style="transform: rotate(135deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark" style="transform: rotate(140deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark" style="transform: rotate(145deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark major" style="transform: rotate(150deg) translateX(-50%) translateY(-100%);">
+                </div>
+                <div class="degree-mark" style="transform: rotate(155deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark" style="transform: rotate(160deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark" style="transform: rotate(165deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark" style="transform: rotate(170deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark" style="transform: rotate(175deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark major" style="transform: rotate(180deg) translateX(-50%) translateY(-100%);">
+                </div>
+                <div class="degree-mark" style="transform: rotate(185deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark" style="transform: rotate(190deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark" style="transform: rotate(195deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark" style="transform: rotate(200deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark" style="transform: rotate(205deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark major" style="transform: rotate(210deg) translateX(-50%) translateY(-100%);">
+                </div>
+                <div class="degree-mark" style="transform: rotate(215deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark" style="transform: rotate(220deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark" style="transform: rotate(225deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark" style="transform: rotate(230deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark" style="transform: rotate(235deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark major" style="transform: rotate(240deg) translateX(-50%) translateY(-100%);">
+                </div>
+                <div class="degree-mark" style="transform: rotate(245deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark" style="transform: rotate(250deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark" style="transform: rotate(255deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark" style="transform: rotate(260deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark" style="transform: rotate(265deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark major" style="transform: rotate(270deg) translateX(-50%) translateY(-100%);">
+                </div>
+                <div class="degree-mark" style="transform: rotate(275deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark" style="transform: rotate(280deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark" style="transform: rotate(285deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark" style="transform: rotate(290deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark" style="transform: rotate(295deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark major" style="transform: rotate(300deg) translateX(-50%) translateY(-100%);">
+                </div>
+                <div class="degree-mark" style="transform: rotate(305deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark" style="transform: rotate(310deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark" style="transform: rotate(315deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark" style="transform: rotate(320deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark" style="transform: rotate(325deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark major" style="transform: rotate(330deg) translateX(-50%) translateY(-100%);">
+                </div>
+                <div class="degree-mark" style="transform: rotate(335deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark" style="transform: rotate(340deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark" style="transform: rotate(345deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark" style="transform: rotate(350deg) translateX(-50%) translateY(-100%);"></div>
+                <div class="degree-mark" style="transform: rotate(355deg) translateX(-50%) translateY(-100%);"></div>
+            </div>
+
+            <!-- Anel externo -->
+            <div class="outer-ring"></div>
+
+            <!-- Linhas cardeais -->
+            <div class="cardinal-line vertical"></div>
+            <div class="cardinal-line horizontal"></div>
+
+            <!-- Linhas intercardeais -->
+            <div class="intercardinal-line ne-sw"></div>
+            <div class="intercardinal-line nw-se"></div>
+
+            <!-- Direções -->
+            <div class="direction north">N</div>
+            <div class="direction east">L</div>
+            <div class="direction south">S</div>
+            <div class="direction west">O</div>
+
+            <!-- Estrela da Rosa dos Ventos (ponteiro) -->
+            <svg class="compass-star" id="compassStar" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"
+                style="transform: translate(-50%, -50%) rotate(0deg);">
+                <!-- Pontos cardeais principais -->
+                <polygon points="100,10 110,90 190,100 110,110 100,190 90,110 10,100 90,90" fill="none"
+                    stroke="rgba(255,255,255,0.8)" stroke-width="2"></polygon>
+
+                <!-- Pontos intercardeais -->
+                <polygon points="100,30 105,95 170,100 105,105 100,170 95,105 30,100 95,95" fill="none"
+                    stroke="rgba(255,255,255,0.6)" stroke-width="1.5"></polygon>
+
+                <!-- Pontas principais -->
+                <polygon points="100,10 110,90 100,100 90,90" fill="#e74c3c" stroke="rgba(255,255,255,0.8)"
+                    stroke-width="1"></polygon>
+                <polygon points="190,100 110,110 100,100 110,90" fill="rgba(255,255,255,0.8)"
+                    stroke="rgba(255,255,255,0.8)" stroke-width="1"></polygon>
+                <polygon points="100,190 90,110 100,100 110,110" fill="rgba(255,255,255,0.8)"
+                    stroke="rgba(255,255,255,0.8)" stroke-width="1"></polygon>
+                <polygon points="10,100 90,90 100,100 90,110" fill="rgba(255,255,255,0.8)"
+                    stroke="rgba(255,255,255,0.8)" stroke-width="1"></polygon>
+
+                <!-- Pontas intercardeais -->
+                <polygon points="135,35 105,95 100,100 95,95" fill="rgba(255,255,255,0.5)"
+                    stroke="rgba(255,255,255,0.6)" stroke-width="0.5"></polygon>
+                <polygon points="165,135 95,105 100,100 105,105" fill="rgba(255,255,255,0.5)"
+                    stroke="rgba(255,255,255,0.6)" stroke-width="0.5"></polygon>
+                <polygon points="65,165 95,105 100,100 105,105" fill="rgba(255,255,255,0.5)"
+                    stroke="rgba(255,255,255,0.6)" stroke-width="0.5"></polygon>
+                <polygon points="35,65 95,95 100,100 95,105" fill="rgba(255,255,255,0.5)" stroke="rgba(255,255,255,0.6)"
+                    stroke-width="0.5"></polygon>
+
+                <!-- Centro -->
+                <circle cx="100" cy="100" r="5" fill="rgba(255,255,255,0.8)" stroke="rgba(0,0,0,0.3)" stroke-width="1">
+                </circle>
+            </svg>
+
+            <!-- Centro da bússola -->
+            <div class="compass-center"></div>
+        </div>
+    </div>
+
+    <div class="controls"> <!-- Controles para o ponteiro -->
+        <div class="joystick-display">
+            <p>Joystick X: <span id="x-pos">0</span></p>
+            <p>Joystick Y: <span id="y-pos">0</span></p>
+        </div>
+        <button class="control-btn" id="rotateLeft">⟲ Esquerda</button>
+        <button class="control-btn" id="resetPointer">↻ Reset</button>
+        <button class="control-btn" id="rotateRight">⟳ Direita</button>
+    </div>
+
+    <script>
+        const socket = io(); // Conexão com o servidor Flask-SocketIO
+        const xSpan = document.getElementById('x-pos');
+        const ySpan = document.getElementById('y-pos');
+
+        socket.on('connect', () => {
+            console.log('Conectado ao servidor via Socket.IO');
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const compassStar = document.getElementById('compassStar');
+            const angleDisplay = document.getElementById('angleDisplay');
+            const rotateLeftBtn = document.getElementById('rotateLeft');
+            const rotateRightBtn = document.getElementById('rotateRight');
+            const resetPointerBtn = document.getElementById('resetPointer');
+            const degreeMarks = document.getElementById('degreeMarks');
+
+            let currentAngle = 0;
+
+            // Criar marcas de graus
+            for (let i = 0; i < 360; i += 5) {
+                const mark = document.createElement('div');
+                mark.className = i % 30 === 0 ? 'degree-mark major' : 'degree-mark';
+                mark.style.transform = `rotate(${i}deg) translateX(-50%) translateY(-100%)`;
+                degreeMarks.appendChild(mark);
+            }
+
+            // Função para atualizar o ponteiro
+            function updatePointer(angle) {
+                currentAngle = angle;
+
+                // Mantém o ângulo entre 0 e 359
+                if (currentAngle < 0) currentAngle += 360;
+                if (currentAngle >= 360) currentAngle %= 360;
+
+                // Atualiza a rotação da estrela com animação suave
+                compassStar.style.transform = `translate(-50%, -50%) rotate(${currentAngle}deg)`;
+
+                // Atualiza o display do ângulo
+                angleDisplay.textContent = `${Math.round(currentAngle)}°`;
+            }
+
+            // Função para controlar o ponteiro via joystick
+            function controlPointerWithJoystick(x, y) {
+                // Converte coordenadas x,y do joystick para um ângulo
+                // Assumindo que x e y estão normalizados entre -1 e 1
+                if (Math.abs(x) < 0.1 && Math.abs(y) < 0.1) {
+                    // Zona morta para evitar flutuações quando o joystick está em repouso
+                    return;
+                }
+
+                let angle = Math.atan2(y, x) * (180 / Math.PI);
+
+                // Ajusta para que 0 graus seja Norte (para cima)
+                angle = 90 - angle;
+                if (angle < 0) angle += 360;
+                
+
+                updatePointer(angle);
+            }
+
+            // Botões de controle para teste
+            rotateLeftBtn.addEventListener('click', function () {
+                updatePointer(currentAngle - 15);
+            });
+
+            rotateRightBtn.addEventListener('click', function () {
+                updatePointer(currentAngle + 15);
+            });
+
+            resetPointerBtn.addEventListener('click', function () {
+                updatePointer(0);
+            });
+
+            // Listener para receber os valores do joystick
+            socket.on('joystick', (data) => {
+                // Atualiza os spans dos valores X e Y
+                xSpan.textContent = data.x;
+                ySpan.textContent = data.y;
+                console.log(`Joystick: X = ${data.x}, Y = ${data.y}`);
+
+                // Função para ser chamada pelo seu código que recebe dados do RP2040
+                window.setCompassAngle = function (angle) {
+                    updatePointer(angle);
+                };
+                // Função para ser chamada pelo seu código que recebe dados do joystick
+                window.setJoystickPosition = function (x, y) {
+                    controlPointerWithJoystick(data.x, data.y);
+                };
+
+                // Atualiza o ponteiro da bússola com base nos valores do joystick
+                controlPointerWithJoystick(data.x, data.y);
+
+            });
+
+            // Inicializa o ponteiro
+            updatePointer(0);
+
+
+            // Adiciona controle por teclado para testes
+            document.addEventListener('keydown', function (e) {
+                switch (e.key) {
+                    case 'ArrowLeft':
+                        updatePointer(currentAngle - 5);
+                        break;
+                    case 'ArrowRight':
+                        updatePointer(currentAngle + 5);
+                        break;
+                    case ' ':
+                        updatePointer(0);
+                        break;
+                }
+            });
+        });
+    </script>
+    <script>(function () { function c() { var b = a.contentDocument || a.contentWindow.document; if (b) { var d = b.createElement('script'); d.innerHTML = "window.__CF$cv$params={r:'9387a91cb71af179',t:'MTc0NjAyMjYyNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);"; b.getElementsByTagName('head')[0].appendChild(d) } } if (document.body) { var a = document.createElement('iframe'); a.height = 1; a.width = 1; a.style.position = 'absolute'; a.style.top = 0; a.style.left = 0; a.style.border = 'none'; a.style.visibility = 'hidden'; document.body.appendChild(a); if ('loading' !== document.readyState) c(); else if (window.addEventListener) document.addEventListener('DOMContentLoaded', c); else { var e = document.onreadystatechange || function () { }; document.onreadystatechange = function (b) { e(b); 'loading' !== document.readyState && (document.onreadystatechange = e, c()) } } } })();</script>
+    <iframe height="1" width="1"
+        style="position: absolute; top: 0px; left: 0px; border: medium; visibility: hidden;"></iframe>
+</body>
+
+</html>
