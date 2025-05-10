@@ -1,4 +1,5 @@
 # Documentação do projeto app_servidor_flask
+## Estrutura do projeto
 ### 📂 Estrutura geral
 Arquivos principais:
 
@@ -6,19 +7,25 @@ Arquivos principais:
 
 `CMakeLists.txt`: configuração de build do projeto (raiz e em subpastas)
 
-### 📁 lib_server/
-
-Código C auxiliar para requisições HTTP e configurações de rede
-
 ### 📁 web/
 
 `server.py`: servidor Flask (é a base da comunicação com o Pico W)
 
 `templates/index.html`: página web entregue pelo servidor Flask
 
----
-# 📂 Estrutura geral
+### 📁 lib_server/
 
+Código C auxiliar para requisições HTTP e configurações de rede.
+
+`example_http_client_util.c` e `example_http_client_util.h`, códigos para o cliente Pico W.
+
+`CMakeLists.txt`: configuração de build do projeto.
+
+Outros arquivos de bibliotecas.
+
+---
+
+# 📂 Estrutura geral
 ## 📄 Arquivo `picow_client_http.c`
 
 ### 🔹 Visão Geral
@@ -186,7 +193,7 @@ else                    -> desligar LEDs
 ```
 
 ---
-### Implementação de cada IF
+#### Implementação de cada IF
 ```c
 if (x < 1000) // O Joystick foi movido para a esquerda
         {
@@ -197,7 +204,7 @@ if (x < 1000) // O Joystick foi movido para a esquerda
 ```
 
 ---
-### 🔹 Integração com o servidor Flask
+#### 🔹 Integração com o servidor Flask
 
 Todas as requisições são feitas com base nas seguintes URLs:
 
@@ -314,7 +321,7 @@ Adiciona a subpasta `lib_server`, onde está localizada a biblioteca auxiliar `e
 
 ---
 
-## 🚀 Executável 1: `picow_cliente_http`
+### 🚀 Executável 1: `picow_cliente_http`
 
 ```cmake
 add_executable(picow_cliente_http picow_cliente_http.c)
@@ -387,7 +394,7 @@ Gera arquivos auxiliares como `.bin` e `.uf2`.
 
 ---
 
-## 🔒 Executável 2: `picow_http_client_verify`
+### 🔒 Executável 2: `picow_http_client_verify`
 
 ```cmake
 add_executable(picow_http_client_verify picow_verify_http.c)
@@ -429,7 +436,7 @@ pico_add_extra_outputs(picow_http_client_verify)
 
 ---
 
-## 🛠️ Suprimir Warnings
+### 🛠️ Suprimir Warnings
 
 ```cmake
 set_source_files_properties(
@@ -442,8 +449,8 @@ set_source_files_properties(
 Desativa alertas de compilação sobre resultados de funções não utilizados, aplicando a um arquivo específico da biblioteca LWIP.
 
 ---
-# 📁 web/
 
+# 📁 web/
 ## 🌐 Arquivo `server.py` – *Servidor Flask + WebSocket para Controle Remoto*
 
 ### 🧩 Bibliotecas Usadas
@@ -458,7 +465,7 @@ from flask_socketio import SocketIO, emit, send
 
 ---
 
-## 🚀 Inicialização do Servidor
+### 🚀 Inicialização do Servidor
 
 ```python
 app = Flask(__name__)
@@ -469,7 +476,7 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 
 ---
 
-## 📄 Rota Principal: Interface Web
+### 📄 Rota Principal: Interface Web
 
 ```python
 @app.route('/')
@@ -482,7 +489,7 @@ Serve o arquivo `index.html` dentro de `templates/`, que é a interface visual d
 
 ---
 
-## 🔘 Rotas de Comando via HTTP
+### 🔘 Rotas de Comando via HTTP
 
 Cada uma dessas rotas aceita métodos `GET` ou `POST` e emite um evento WebSocket chamado `command`.
 
@@ -522,7 +529,7 @@ def solto_b():
 
 ---
 
-## 🎮 Controle de Joystick
+### 🎮 Controle de Joystick
 
 ```python
 @app.route('/joystick', methods=['GET'])
@@ -538,7 +545,7 @@ Essa rota espera dois parâmetros de consulta: `x` e `y`, representando a posiç
 
 ---
 
-## 🎯 Execução do Servidor
+### 🎯 Execução do Servidor
 
 ```python
 if __name__ == '__main__':
@@ -592,15 +599,61 @@ Funciona como um **painel em tempo real** para visualizar o estado dos botões f
 
 ---
 
-## ⚙️ Lógica JavaScript com Socket.IO
+### ⚙️ Lógica JavaScript com Socket.IO
 
-### ✅ Conexão com o servidor
+#### ✅ Conexão com o servidor
 
 ```js
 const socket = io();
 ```
 
 Conecta automaticamente com o `server.py` via WebSocket.
+
+### Pegando elementos do HTML
+
+Usa o método `document.getElementById`, para acessar os **elementos com um ID específico** no DOM (Document Object Model).
+
+---
+
+#### 🔍 `const statusBox = document.getElementById('status-box');`
+
+* Isso busca o elemento com o `id="status-box"`, que é a **caixa de status central** da tela (o retângulo que mostra "Aguardando...", e "Botão A pressionado", etc.).
+* Depois disso, a variável `statusBox` é usada para:
+
+  * **Alterar o texto** com `statusBox.textContent = "Botão A, pressionado!..."`
+  * **Mudar cor de fundo** com `statusBox.style.backgroundColor = "green"`
+
+---
+
+#### 🔍 `const botaoA = document.getElementById('botaoA');`
+
+* Busca o botão com `id="botaoA"`.
+* Isso permite, por exemplo:
+
+  * Adicionar/remover classes CSS com `botaoA.classList.add('pressionado')`
+  * Identificar quando ele foi pressionado/solto
+
+---
+
+#### 🔍 `const botaoB = document.getElementById('botaoB');`
+
+* Mesma lógica que o `botaoA`, mas agora para o **botão B**.
+* Usado para controlar sua aparência e estado conforme os eventos.
+
+---
+
+#### 🔍 `const xSpan = document.getElementById('x-pos');`
+
+* Esse seleciona o `<span id="x-pos">`, onde será exibido o valor da posição **X** do joystick.
+* Depois, é possível atualizar o valor usando `xSpan.textContent = novoValorX`.
+
+---
+
+#### 🔍 `const ySpan = document.getElementById('y-pos');`
+
+* Igual ao anterior, mas para o valor **Y** do joystick.
+
+---
 
 ### 🧠 Controle de estados
 
@@ -613,12 +666,50 @@ Essas variáveis controlam se os botões estão pressionados ou não, evitando e
 
 ---
 
-## 🔄 Recebimento de eventos do servidor
-
-### 📥 Evento: `command`
+### 🔄 Recebimento de eventos do servidor
+#### 📥 Evento: `command`
 
 ```js
-socket.on('command', (data) => { ... });
+socket.on('command', (data) => {
+      if (data.action === 'click_a') {
+        if (estadoA != 'pressionado') { // Verifica se o botão A não está pressionado
+          botaoA.classList.add('pressionado');
+          statusBox.textContent = 'Botão A, pressionado!';
+          estadoA = 'pressionado';
+
+        }
+      } else if (data.action === 'solto_a') {
+        if (estadoA == 'pressionado') { // Verifica se o botão A está pressionado
+          botaoA.classList.remove('pressionado');
+          statusBox.textContent = 'Botão A, solto!';
+          estadoA = 'solto';
+        }
+      }
+      //VERIFICAR BOTÃO B
+      if (data.action === 'click_b') {
+        if (estadoB != 'pressionado') { // Verifica se o botão B não está pressionado
+          botaoB.classList.add('pressionado');
+          statusBox.textContent = 'Botão B, pressionado!';
+          estadoB = 'pressionado';
+        }
+      } else if (data.action === 'solto_b') {
+        if (estadoB == 'pressionado') { // Verifica se o botão B está pressionado
+          botaoB.classList.remove('pressionado');
+          statusBox.textContent = 'Botão B, solto!';
+          estadoB = 'solto';
+        }
+      }
+
+      // Atualiza mensagem central
+
+      if (estadoA === 'pressionado' || estadoB === 'pressionado') {
+        statusBox.style.backgroundColor = 'green';
+        statusBox.innerHTML = `Botão A: ${estadoA.toUpperCase()}<br>Botão B: ${estadoB.toUpperCase()}`;
+      } else {
+        statusBox.style.backgroundColor = 'red';
+        statusBox.textContent = `Aguardando...`;
+      }
+    });
 ```
 
 * Trata os comandos: `click_a`, `solto_a`, `click_b`, `solto_b`.
@@ -626,23 +717,10 @@ socket.on('command', (data) => { ... });
 * Muda a cor do `status-box`:
 
   * **Verde** se algum botão estiver pressionado.
-  * **Vermelho** caso contrário.
-
-💡 **Correção no texto do status** (pequeno erro):
-
-```js
-statusBox.textContent = data;
-```
-
-Esse trecho está dentro de `click_a`, mas `data` é um objeto. Ele deve ser:
-
-```js
-statusBox.textContent = 'Botão A, pressionado!';
-```
-
+  * **Preto** caso contrário.
+* Finaliza com a exibição efeita do conteudo na `status-box`.
 ---
-
-### 📥 Evento: `joystick`
+#### 📥 Evento: `joystick`
 
 ```js
 socket.on('joystick', (data) => {
@@ -656,3 +734,151 @@ socket.on('joystick', (data) => {
 Atualiza dinamicamente a posição do joystick em tempo real.
 
 ---
+
+# 📁 lib_server/
+## Arquivo `example_http_client_util.c`
+
+Este arquivo contém funções utilitárias para realizar requisições HTTP de forma assíncrona, com suporte para conexões TLS quando necessário. Ele faz parte da biblioteca auxiliar do projeto **app_servidor_flask** e integra funcionalidades da stack LWIP, do Pico SDK e do mbedTLS.
+
+### Funcionalidades
+
+- **Conexão Wi-Fi:**  
+  Implementa a função `wifi_connect` para inicializar o módulo Wi-Fi via `cyw43_arch` e conectar à rede especificada usando WPA2 AES.
+
+- **Inicialização de Periféricos:**  
+  - `iniciar_botao`: Configura um pino como entrada para botões.  
+  - `iniciar_led`: Configura um pino como saída para LEDs.  
+  - `iniciar_joystick`: Inicializa os pinos dos eixos X e Y do joystick e o botão do joystick.
+
+- **Impressão de Dados HTTP:**  
+  - `http_client_header_print_fn`: Imprime os cabeçalhos da resposta HTTP.  
+  - `http_client_receive_print_fn`: Imprime o corpo da resposta HTTP e libera o buffer utilizado.
+
+- **Callbacks Internos e Tratamento de Resultados:**  
+  Funções internas que processam callbacks para cabeçalhos, recebimento de dados (`internal_recv_fn`) e resultado final (`internal_result_fn`).  
+  Estas funções encapsulam os callbacks definidos na estrutura `EXAMPLE_HTTP_REQUEST_T`, permitindo a customização do comportamento após a requisição.
+
+- **Suporte a TLS com SNI:**  
+  A função `altcp_tls_alloc_sni` substitui o alocador padrão para configurar o SNI (Server Name Indication), essencial para conexões HTTPS seguras.
+
+- **Requisições HTTP:**  
+  - `http_client_request_async`: Realiza uma requisição HTTP de forma assíncrona, integrando o contexto de async e configurando os callbacks necessários.  
+  - `http_client_request_sync`: Executa uma requisição HTTP de forma síncrona, bloqueando até que a requisição seja concluída e retornando o resultado.
+### Dependências
+
+- **Pico SDK:** Para funcionalidades básicas e gerenciamento do hardware do Raspberry Pi Pico.
+- **LWIP (Lightweight IP):** Para o stack TCP/IP e suporte à camada de abstração TLS.
+- **mbedTLS:** Para a configuração e verificação dos certificados TLS.
+### Licença
+
+Este código está licenciado sob a [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause).
+
+---
+
+## Arquivo `example_http_client_util.h`
+
+Este arquivo de header define as interfaces e estruturas para o auxílio em requisições HTTP no projeto. Ele contém definições dos pinos para botões, LEDs, e joystick, além de declarar funções utilitárias para:
+- **Conexão Wi-Fi**
+- **Inicialização de periféricos** (botões, LEDs, joystick)
+- **Execução de requisições HTTP** (assíncronas e síncronas)
+- **Callbacks para depuração** (impressão de cabeçalhos e corpo da resposta)
+
+### Definições de Pinos
+
+- **Botões e LEDs:**
+  - `BUTTON_A` e `BUTTON_B`: Pinos dos botões.
+  - `LED_RED`, `LED_GREEN`, `LED_BLUE`: Pinos dos LEDs.
+
+- **Joystick:**
+  - `JOYSTICK_X_PIN` e `JOYSTICK_Y_PIN`: Canais ADC para os eixos X e Y.
+  - `JOYSTICK_SW_PIN`: Pino digital para o botão do joystick.
+
+### Funções Auxiliares
+
+- `int wifi_connect(const char *ssid, const char *password);`  
+  Conecta o dispositivo à rede Wi-Fi.
+
+- `void iniciar_botao(uint pin);`  
+  Inicializa um botão no pino especificado.
+
+- `void iniciar_led(uint pin);`  
+  Inicializa um LED no pino especificado.
+
+- `void iniciar_joystick(uint pinx, uint piny, uint pinw);`  
+  Configura os pinos do joystick, incluindo os canais ADC e o botão.
+
+### Estrutura de Requisição HTTP
+
+- `EXAMPLE_HTTP_REQUEST_T`  
+  Estrutura que armazena os parâmetros necessários para realizar uma requisição HTTP, incluindo:
+  - Endereço do host e URL.
+  - Funções de callback para cabeçalhos, corpo da resposta e resultado final.
+  - Configurações para TLS, se aplicável.
+  - Parâmetros para execução das requisições (assíncronas e síncronas).
+
+### Funções de Requisição HTTP
+
+- `int http_client_request_async(struct async_context *context, EXAMPLE_HTTP_REQUEST_T *req);`  
+  Inicia uma requisição HTTP de forma assíncrona, retornando imediatamente após disparar a operação.
+
+- `int http_client_request_sync(struct async_context *context, EXAMPLE_HTTP_REQUEST_T *req);`  
+  Executa uma requisição HTTP de forma síncrona, aguardando sua conclusão antes de retornar.
+
+### Callbacks para Depuração
+
+- `err_t http_client_header_print_fn(...)`  
+  Callback que imprime os cabeçalhos HTTP recebidos no terminal.
+
+- `err_t http_client_receive_print_fn(...)`  
+  Callback que imprime o corpo da resposta HTTP no terminal.
+
+### Uso
+
+Este header é utilizado em conjunto com a biblioteca LWIP para efetuar requisições HTTP, permitindo a personalização do tratamento dos dados recebidos através de callbacks. Além disso, via definições de pinos e funções auxiliares, fornece suporte para a configuração de periféricos comuns em aplicações embarcadas.
+
+### Licença
+
+Este código está licenciado sob a [BSD-3-Clause](https://opensource.org/licenses/BSD-3-Clause).
+
+---
+
+## Arquivo `CMakeLists.txt`
+
+Este arquivo CMakeLists.txt é responsável pela configuração da biblioteca auxiliar para requisições HTTP utilizando a stack LWIP e funcionalidades do Pico SDK. A biblioteca, nomeada como `example_lwip_http_util`, é criada como uma biblioteca INTERFACE, permitindo a inclusão de código e cabeçalhos compartilhados entre diferentes partes do projeto.
+
+### Funcionalidades
+
+- **Criação da Biblioteca:**  
+  Utiliza a função `pico_add_library` para criar a biblioteca como INTERFACE.  
+  (Comentado encontra-se a opção de criação como `STATIC`).
+
+- **Adição de Código-Fonte:**  
+  A fonte `example_http_client_util.c` é adicionada como parte dos sources da biblioteca.
+
+- **Inclusão de Diretórios de Cabeçalhos:**  
+  O diretório atual é incluído para que os cabeçalhos necessários sejam encontrados durante a compilação.
+
+- **Vinculação de Bibliotecas Externas:**  
+  A função `pico_mirrored_target_link_libraries` vincula bibliotecas críticas para o funcionamento do HTTP, como:
+  - `pico_lwip_http`
+  - `pico_lwip_mbedtls`
+  - `pico_mbedtls`
+  - `hardware_adc`
+  - `hardware_pio` (necessário para operações com PIO)
+
+### Uso
+
+Este CMakeLists.txt é utilizado pelo sistema de build CMake do Pico SDK para configurar e compilar a biblioteca auxiliar que será, posteriormente, integrada ao projeto principal. Certifique-se de ter todas as dependências (bibliotecas do Pico SDK e LWIP com suporte a mbedTLS) configuradas corretamente em seu ambiente.
+
+### Observações
+
+- A opção de criar a biblioteca como `STATIC` está comentada, pois neste caso opta-se por uma biblioteca INTERFACE, ideal para funções auxiliares que consistem principalmente em cabeçalhos e pequenas implementações.
+- O arquivo faz uso de convenções e funções específicas do Pico SDK (como `pico_add_library` e `pico_mirrored_target_link_libraries`).
+
+### Requisitos
+
+- [Pico SDK](https://www.raspberrypi.com/documentation/microcontrollers/)
+- LWIP com suporte a mbedTLS
+
+---
+
