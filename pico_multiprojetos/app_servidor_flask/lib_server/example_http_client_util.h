@@ -1,124 +1,139 @@
 /**
  * Copyright (c) 2024 Raspberry Pi (Trading) Ltd.
- *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
- #ifndef EXAMPLE_HTTP_CLIENT_UTIL_H
- #define EXAMPLE_HTTP_CLIENT_UTIL_H
- 
- #include "lwip/apps/http_client.h"
+#ifndef EXAMPLE_HTTP_CLIENT_UTIL_H
+#define EXAMPLE_HTTP_CLIENT_UTIL_H
 
- // ======= CONFIGURAÇÕES ======= //
-#define BUTTON_A 5          // Pino do botão A
-#define BUTTON_B 6          // Pino do botão B
-#define LED_RED 13          // Pino do LED vermelho
-#define LED_GREEN 12        // Pino do LED verde
-#define LED_BLUE 11         // Pino do LED azul
-// ============================= //
-// ======== CONFIGURAÇÕES DO JOYSTIK ================ //
-#define JOYSTICK_X_PIN 27
-#define JOYSTICK_Y_PIN 26
-#define JOYSTICK_SW_PIN 22
-// =================================================== //
-// ======= FUNÇÕES AUTORAIS ======= //
-int wifi_connect(const char *ssid, const char *password);
-void iniciar_botao(uint pin); // Inicializa o botão na porta especificada
-void iniciar_led(uint pin);   // Inicializa o LED na porta especificada
-void iniciar_joystick(uint pinx, uint piny, uint pinw); // Inicializa o joystick na porta especificada
-// ============================= //
- /*! \brief Parameters used to make HTTP request
-  *  \ingroup pico_lwip
-  */
- typedef struct EXAMPLE_HTTP_REQUEST {
-     //Diz pra quem é o pedido (hostname e url);
-     const char *hostname;
-     const char *url;
-    httpc_headers_done_fn headers_fn; //Função de callback que é chamada quando os cabeçalhos HTTP chegam
-    altcp_recv_fn recv_fn; //Função de callback que será chamada quando o conteúdo da resposta chegar.
-    httpc_result_fn result_fn; //Função que é chamada quando o pedido termina, com sucesso ou erro.
-    void *callback_arg; //Informação extra que você pode passar para usar dentro das funções de callback.
-    uint16_t port; //A porta a ser usada. Uma porta padrão é escolhida se este valor for definido como zero
+#include "lwip/apps/http_client.h"
 
- #if LWIP_ALTCP && LWIP_ALTCP_TLS
-     /*!
-      * TLS configuration, can be null or set to a correctly configured tls configuration.
-      * e.g altcp_tls_create_config_client(NULL, 0) would use https without a certificate
-      */
-     struct altcp_tls_config *tls_config;
-     /*!
-      * TLS allocator, used internall for setting TLS server name indication
-      */
-     altcp_allocator_t tls_allocator;
- #endif
-     /*!
-      * LwIP HTTP client settings
-      */
-     httpc_connection_t settings;
-     /*!
-      * Flag to indicate when the request is complete
-      */
-     int complete;
-     /*!
-      * Overall result of http request, only valid when complete is set
-      */
-     httpc_result_t result;
- 
- } EXAMPLE_HTTP_REQUEST_T; // Aqui terminamos a declaração da struct. Ela é usada como tipo de dado.
- 
- struct async_context;
- 
-/*! \brief Executa uma requisição HTTP de forma assíncrona
- *  \ingroup pico_lwip
- *
- * Executa a requisição HTTP de forma assíncrona
- * Assíncrona (funciona como pedir uma pizza e continuar jogando videogame)
- *
- * @param context contexto assíncrono
- * @param req Parâmetros da requisição HTTP. No mínimo, deve ser inicializado com zero e com hostname e url definidos com valores válidos.
- * @return Se retornar zero, a requisição foi feita e estará completa quando \em req->complete for verdadeiro ou o callback de resultado tiver sido chamado.
- *  Retornar um valor diferente de zero indica um erro.
- *
- * @see async_context
+// ==================== DEFINIÇÕES DE PINOS ==================== //
+// Define os pinos utilizados para os botões e LEDs no projeto.
+#define BUTTON_A 5          // Pino do botão A (GPIO 5)
+#define BUTTON_B 6          // Pino do botão B (GPIO 6)
+#define LED_RED 13          // Pino do LED vermelho (GPIO 13)
+#define LED_GREEN 12        // Pino do LED verde (GPIO 12)
+#define LED_BLUE 11         // Pino do LED azul (GPIO 11)
+
+// ============ CONFIGURAÇÕES DO JOYSTICK ============ //
+// Define os pinos conectados ao joystick analógico.
+#define JOYSTICK_X_PIN 27   // Canal ADC para eixo X (GPIO 27)
+#define JOYSTICK_Y_PIN 26   // Canal ADC para eixo Y (GPIO 26)
+#define JOYSTICK_SW_PIN 22  // Pino digital do botão do joystick (GPIO 22)
+
+// ==================== FUNÇÕES AUXILIARES ==================== //
+/**
+ * @brief Conecta à rede Wi-Fi especificada.
+ * 
+ * @param ssid Nome da rede Wi-Fi.
+ * @param password Senha da rede Wi-Fi.
+ * @return 0 em caso de sucesso, ou outro valor em caso de erro.
  */
- int http_client_request_async(struct async_context *context, EXAMPLE_HTTP_REQUEST_T *req);
- 
- /*! \brief Perform a http request synchronously
-  *  \ingroup pico_lwip
-  *
-  * Perform the http request synchronously
-  * Síncrona (você espera a pizza chegar antes de jogar)
-  *
-  * @param context async context
-  * @param req HTTP request parameters. As a minimum this should be initialised to zero with hostname and url set to valid values
-  * @param result Returns the overall result of the http request when complete. Zero indicates success.
-  */
- int http_client_request_sync(struct async_context *context, EXAMPLE_HTTP_REQUEST_T *req);
- 
- /*! \brief A http header callback that can be passed to \em http_client_init or \em http_client_init_secure
-  *  \ingroup pico_http_client
-  *
-  * An implementation of the http header callback which just prints headers to stdout
-  *
-  * @param arg argument specified on initialisation
-  * @param hdr header pbuf(s) (may contain data also)
-  * @param hdr_len length of the headers in 'hdr'
-  * @param content_len content length as received in the headers (-1 if not received)
-  * @return if != zero is returned, the connection is aborted
-  */
- err_t http_client_header_print_fn(httpc_state_t *connection, void *arg, struct pbuf *hdr, u16_t hdr_len, u32_t content_len);
- 
- /*! \brief A http recv callback that can be passed to http_client_init or http_client_init_secure
-  *  \ingroup pico_http_client
-  *
-  * An implementation of the http recv callback which just prints the http body to stdout
-  *
-  * @param arg argument specified on initialisation
-  * @param conn http client connection
-  * @param p body pbuf(s)
-  * @param err Error code in the case of an error
-  * @return if != zero is returned, the connection is aborted
-  */
- err_t http_client_receive_print_fn(void *arg, struct altcp_pcb *conn, struct pbuf *p, err_t err);
- 
- #endif 
+int wifi_connect(const char *ssid, const char *password);
+
+/**
+ * @brief Inicializa um botão em um pino GPIO.
+ * 
+ * @param pin Número do pino GPIO.
+ */
+void iniciar_botao(uint pin);
+
+/**
+ * @brief Inicializa um LED em um pino GPIO.
+ * 
+ * @param pin Número do pino GPIO.
+ */
+void iniciar_led(uint pin);
+
+/**
+ * @brief Inicializa o joystick com os pinos especificados.
+ * 
+ * @param pinx Pino do eixo X (ADC).
+ * @param piny Pino do eixo Y (ADC).
+ * @param pinw Pino do botão do joystick (digital).
+ */
+void iniciar_joystick(uint pinx, uint piny, uint pinw);
+
+// ==================== ESTRUTURA DE REQUISIÇÃO HTTP ==================== //
+
+/**
+ * @brief Estrutura para armazenar parâmetros de uma requisição HTTP.
+ * 
+ * Utilizada com a biblioteca LWIP para fazer requisições HTTP (com ou sem TLS).
+ */
+typedef struct EXAMPLE_HTTP_REQUEST {
+    const char *hostname;                  // Nome do host (ex: "meuservidor.com")
+    const char *url;                       // Caminho da requisição (ex: "/comando")
+    httpc_headers_done_fn headers_fn;      // Callback chamado quando os cabeçalhos são recebidos
+    altcp_recv_fn recv_fn;                 // Callback chamado quando o corpo da resposta é recebido
+    httpc_result_fn result_fn;             // Callback chamado ao final da requisição
+    void *callback_arg;                    // Argumento opcional passado aos callbacks
+    uint16_t port;                         // Porta da conexão (ex: 80 ou 443)
+
+#if LWIP_ALTCP && LWIP_ALTCP_TLS
+    struct altcp_tls_config *tls_config;   // Configuração TLS para conexões HTTPS
+    altcp_allocator_t tls_allocator;       // Alocador TLS interno
+#endif
+
+    httpc_connection_t settings;           // Configurações da conexão HTTP
+    int complete;                          // Flag: 1 quando a requisição for concluída
+    httpc_result_t result;                 // Resultado final da requisição (0 = sucesso)
+} EXAMPLE_HTTP_REQUEST_T;
+
+struct async_context; // Contexto para operações assíncronas
+
+// ==================== FUNÇÕES DE REQUISIÇÃO HTTP ==================== //
+
+/**
+ * @brief Executa uma requisição HTTP de forma assíncrona (não bloqueante).
+ * 
+ * @param context Ponteiro para o contexto assíncrono.
+ * @param req Estrutura de requisição preenchida.
+ * @return 0 se a requisição foi iniciada com sucesso, ou outro valor em caso de erro.
+ * 
+ * Observação: A função retorna imediatamente. O resultado será tratado nos callbacks.
+ */
+int http_client_request_async(struct async_context *context, EXAMPLE_HTTP_REQUEST_T *req);
+
+/**
+ * @brief Executa uma requisição HTTP de forma síncrona (bloqueante).
+ * 
+ * @param context Contexto assíncrono.
+ * @param req Estrutura com os parâmetros da requisição.
+ * @param result Retorna o resultado da requisição (0 = sucesso).
+ * @return 0 em caso de sucesso, ou outro valor se falhar.
+ * 
+ * Observação: A função só retorna após a conclusão da requisição.
+ */
+int http_client_request_sync(struct async_context *context, EXAMPLE_HTTP_REQUEST_T *req);
+
+// ==================== CALLBACKS ÚTEIS PARA DEBUG ==================== //
+
+/**
+ * @brief Callback que imprime os cabeçalhos HTTP no terminal.
+ * 
+ * Pode ser usado em headers_fn da requisição.
+ * 
+ * @param arg Argumento passado durante a inicialização.
+ * @param hdr Cabeçalhos recebidos.
+ * @param hdr_len Tamanho dos cabeçalhos.
+ * @param content_len Tamanho do corpo (se informado pelo servidor).
+ * @return Retornar diferente de zero cancela a conexão.
+ */
+err_t http_client_header_print_fn(httpc_state_t *connection, void *arg, struct pbuf *hdr, u16_t hdr_len, u32_t content_len);
+
+/**
+ * @brief Callback que imprime o corpo da resposta HTTP no terminal.
+ * 
+ * Pode ser usado em recv_fn da requisição.
+ * 
+ * @param arg Argumento passado durante a inicialização.
+ * @param conn Estrutura da conexão.
+ * @param p Dados do corpo da resposta.
+ * @param err Código de erro (se houver).
+ * @return Retornar diferente de zero cancela a conexão.
+ */
+err_t http_client_receive_print_fn(void *arg, struct altcp_pcb *conn, struct pbuf *p, err_t err);
+
+#endif // EXAMPLE_HTTP_CLIENT_UTIL_H
