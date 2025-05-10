@@ -16,7 +16,8 @@ Código C auxiliar para requisições HTTP e configurações de rede
 
 `templates/index.html`: página web entregue pelo servidor Flask
 
-
+---
+# 📂 Estrutura geral
 
 ## 📄 Arquivo `picow_client_http.c`
 
@@ -441,7 +442,217 @@ set_source_files_properties(
 Desativa alertas de compilação sobre resultados de funções não utilizados, aplicando a um arquivo específico da biblioteca LWIP.
 
 ---
+# 📁 web/
 
+## 🌐 Arquivo `server.py` – *Servidor Flask + WebSocket para Controle Remoto*
 
+### 🧩 Bibliotecas Usadas
 
+```python
+from flask import Flask, render_template, request 
+from flask_socketio import SocketIO, emit, send
+```
 
+* `Flask`: cria a aplicação web.
+* `SocketIO`: habilita comunicação em tempo real entre o servidor e os clientes via WebSockets.
+
+---
+
+## 🚀 Inicialização do Servidor
+
+```python
+app = Flask(__name__)
+socketio = SocketIO(app, cors_allowed_origins="*")
+```
+
+* `cors_allowed_origins="*"` permite que qualquer origem (inclusive o Pico W) se conecte ao servidor.
+
+---
+
+## 📄 Rota Principal: Interface Web
+
+```python
+@app.route('/')
+def index():
+    return render_template('index.html')  # Renderiza o template web/templates/index.html
+
+```
+
+Serve o arquivo `index.html` dentro de `templates/`, que é a interface visual do projeto.
+
+---
+
+## 🔘 Rotas de Comando via HTTP
+
+Cada uma dessas rotas aceita métodos `GET` ou `POST` e emite um evento WebSocket chamado `command`.
+
+### 🔴 Botão A
+
+```python
+@app.route('/CLICK_A', methods=['GET', 'POST']) # Define a rota para o comando de clique
+# Define uma função para lidar com o evento de clique do botão A
+def click_a():
+    print("Comando: Botão A, pressionado")
+    socketio.emit('command', {'action': 'click_a'})  # Envia comando para ON
+    return 'Click command sent', 200 # Retorna resposta HTTP 200
+
+@app.route('/SOLTO_A', methods=['GET', 'POST']) # Define a rota para o comando de solto
+def solto_a():
+    print("Comando: Botão A, solto")
+    socketio.emit('command', {'action': 'solto_a'})  # Envia comando para OFF
+    return 'solto command sent', 200
+```
+
+### 🔵 Botão B
+
+```python
+@app.route('/CLICK_B', methods=['GET', 'POST']) # Define a rota para o comando de clique
+# Define uma função para lidar com o evento de clique do botão A
+def click_b():
+    print("Comando: Botão B, pressionado")
+    socketio.emit('command', {'action': 'click_b'})  # Envia comando para ON
+    return 'Click command sent', 200 # Retorna resposta HTTP 200
+
+@app.route('/SOLTO_B', methods=['GET', 'POST']) # Define a rota para o comando de solto
+def solto_b():
+    print("Comando: Botão B, solto")
+    socketio.emit('command', {'action': 'solto_b'})  # Envia comando para OFF
+    return 'solto command sent', 200
+```
+
+---
+
+## 🎮 Controle de Joystick
+
+```python
+@app.route('/joystick', methods=['GET'])
+def joystick():
+    x = request.args.get('x', type=int)
+    y = request.args.get('y', type=int)
+    print(f"Dados do joystick recebidos: X = {x}, Y = {y}")
+    socketio.emit('joystick', {'x': x, 'y': y})  # Envia os dados do joystick para o cliente
+    return "Dados recebidos", 200
+```
+
+Essa rota espera dois parâmetros de consulta: `x` e `y`, representando a posição do joystick. Os dados são emitidos em tempo real para os clientes conectados.
+
+---
+
+## 🎯 Execução do Servidor
+
+```python
+if __name__ == '__main__':
+    socketio.run(app, host='0.0.0.0', port=5000)
+```
+
+* `host='0.0.0.0'`: permite acesso de qualquer dispositivo da rede.
+* `port=5000`: define a porta do servidor.
+
+---
+
+### ✅ Resumo das Rotas HTTP
+
+| Rota        | Função                       | Evento WebSocket Emitido |
+| ----------- | ---------------------------- | ------------------------ |
+| `/CLICK_A`  | Pressionar Botão A           | `{'action': 'click_a'}`  |
+| `/SOLTO_A`  | Soltar Botão A               | `{'action': 'solto_a'}`  |
+| `/CLICK_B`  | Pressionar Botão B           | `{'action': 'click_b'}`  |
+| `/SOLTO_B`  | Soltar Botão B               | `{'action': 'solto_b'}`  |
+| `/joystick` | Enviar dados X/Y do joystick | `{'x': X, 'y': Y}`       |
+
+---
+
+## 🌐 Arquivo `index.html` – *Página Web*
+
+Funciona como um **painel em tempo real** para visualizar o estado dos botões físicos da BitDogLab e os dados do joystick, tudo via **WebSockets com Socket.IO**.
+
+---
+
+### 🖼️ Layout
+
+* **Dois botões visuais**: `Botão A` e `Botão B`.
+```html
+<div class="button-container">
+    <button id="botaoA" class="btn">Botão A</button>
+    <button id="botaoB" class="btn">Botão B</button>
+</div>
+```
+* **Caixa de status**: Mostra se os botões estão pressionados ou soltos.
+```html
+<div id="status-box">Aguardando...</div>
+```
+* **Leitura do Joystick**: Mostra os valores `X` e `Y`.
+```html
+<div class="joystick">
+    <h2>Posição do Joystick</h2>
+    <p>X: <span id="x-pos">0</span></p>
+    <p>Y: <span id="y-pos">0</span></p>
+  </div>
+```
+
+---
+
+## ⚙️ Lógica JavaScript com Socket.IO
+
+### ✅ Conexão com o servidor
+
+```js
+const socket = io();
+```
+
+Conecta automaticamente com o `server.py` via WebSocket.
+
+### 🧠 Controle de estados
+
+```js
+let estadoA = 'solto';
+let estadoB = 'solto';
+```
+
+Essas variáveis controlam se os botões estão pressionados ou não, evitando estados inconsistentes.
+
+---
+
+## 🔄 Recebimento de eventos do servidor
+
+### 📥 Evento: `command`
+
+```js
+socket.on('command', (data) => { ... });
+```
+
+* Trata os comandos: `click_a`, `solto_a`, `click_b`, `solto_b`.
+* Atualiza classes CSS e o conteúdo do `#status-box` dinamicamente.
+* Muda a cor do `status-box`:
+
+  * **Verde** se algum botão estiver pressionado.
+  * **Vermelho** caso contrário.
+
+💡 **Correção no texto do status** (pequeno erro):
+
+```js
+statusBox.textContent = data;
+```
+
+Esse trecho está dentro de `click_a`, mas `data` é um objeto. Ele deve ser:
+
+```js
+statusBox.textContent = 'Botão A, pressionado!';
+```
+
+---
+
+### 📥 Evento: `joystick`
+
+```js
+socket.on('joystick', (data) => {
+      // Atualiza os spans dos valores X e Y
+      xSpan.textContent = data.x;
+      ySpan.textContent = data.y;
+      console.log(`Joystick: X = ${data.x}, Y = ${data.y}`);
+});
+```
+
+Atualiza dinamicamente a posição do joystick em tempo real.
+
+---
