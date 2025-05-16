@@ -38,6 +38,7 @@
     "raspberry-pi-pico.ninjaPath": "${HOME}/.pico-sdk/ninja/v1.12.1/ninja",
     "files.associations": {
         "async_context.h": "c",
-        "example_http_client_util.h": "c"
+        "example_http_client_util.h": "c",
+        "adc.h": "c"
     }
 }
