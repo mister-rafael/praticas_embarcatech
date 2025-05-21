@@ -9,10 +9,12 @@
 #include "exemplo_http_client_util.h"
 // INLUDES PARA USO DO JOYSTICK
 #include "hardware/adc.h"
+#include "setup_utils.h"             //Biblioteca de configuração do sistema e periféricos.
+#include "actions_io.h"              //Biblioteca de ações de entrada e saída.
 
 // ========== CONFIGURAÇÕES ======================== //
 // #define HOST "192.168.0.20" // IP do servidor de casa
-#define HOST "10.3.10.79" // IP do servidor do IFPI
+#define HOST "10.3.10.191" // IP do servidor do IFPI
 #define PORT 5000          // Porta do servidor
 #define INTERVALO_MS 500   // Intervalo de verificação do botão (em milissegundos)
 
@@ -82,14 +84,14 @@ int main()
     // Inicializando entradas padrão
     stdio_init_all();
     // Configuração do Pino do Botão
-    iniciar_botao(BUTTON_A); // Inicializa o botão A
-    iniciar_botao(BUTTON_B); // Inicializa o botão B
+    iniciar_botao(BUTTON_A_PIN); // Inicializa o botão A
+    iniciar_botao(BUTTON_B_PIN); // Inicializa o botão B
     // Configuração do Pino do Joystick
     iniciar_joystick(JOYSTICK_X_PIN, JOYSTICK_Y_PIN, JOYSTICK_SW_PIN); // Inicializa o joystick no pino X, Y e SW
     // Conifguração do Led
-    iniciar_led(LED_RED);   // Inicializa o LED vermelho
-    iniciar_led(LED_GREEN); // Inicializa o LED verde
-    iniciar_led(LED_BLUE);  // Inicializa o LED azul
+    iniciar_led(RED_LED_PIN);   // Inicializa o LED vermelho
+    iniciar_led(GREEN_LED_PIN); // Inicializa o LED verde
+    iniciar_led(BLUE_LED_PIN);  // Inicializa o LED azul
 
     printf("\nIniciando cliente HTTP...\n");
 
@@ -112,12 +114,12 @@ int main()
         const char *path_joystik = NULL; // Variável para armazenar o caminho do joystick
 
         // Se o botão A for apertado
-        int estado_real_a = (gpio_get(BUTTON_A) == 0) ? 0 : 1; // 0: pressionado, 1: solto
+        int estado_real_a = (gpio_get(BUTTON_A_PIN) == 0) ? 0 : 1; // 0: pressionado, 1: solto
         if (button_a_state != estado_real_a)                   // Verifica se o estado do botão A mudou
         {
             // Atualiza o caminho com base no estado do botão A
             path_a = (estado_real_a == 0) ? "/CLICK_A" : "/SOLTO_A";
-            gpio_put(LED_RED, (estado_real_a == 0) ? 1 : 0);
+            gpio_put(RED_LED_PIN, (estado_real_a == 0) ? 1 : 0);
             button_a_state = estado_real_a;
 
             // Envia o comando para o servidor Flask
@@ -125,12 +127,12 @@ int main()
             sleep_ms(20); // Evita múltiplos envios rápidos
         }
         // Se o botão B for apertado
-        int estado_real_b = (gpio_get(BUTTON_B) == 0) ? 0 : 1; // 0: pressionado, 1: solto
+        int estado_real_b = (gpio_get(BUTTON_B_PIN) == 0) ? 0 : 1; // 0: pressionado, 1: solto
         if (button_b_state != estado_real_b)                   // Verifica se o estado do botão A mudou
         {
             // Atualiza o caminho com base no estado do botão A
             path_b = (estado_real_b == 0) ? "/CLICK_B" : "/SOLTO_B";
-            gpio_put(LED_GREEN, (estado_real_b == 0) ? 1 : 0);
+            gpio_put(GREEN_LED_PIN, (estado_real_b == 0) ? 1 : 0);
             button_b_state = estado_real_b;
 
             // Função para enviar os dados do botão B
@@ -145,39 +147,39 @@ int main()
 
         if (x < 1000) // O Joystick foi movido para a esquerda
         {
-            gpio_put(LED_BLUE, 1);
+            gpio_put(BLUE_LED_PIN, 1);
             // Envia os dados para o servidor Flask
             enviar_dados_joystick(x, y);
         }
         else if (x > 3000) // O Joystick foi movido para a direita
         {
-            gpio_put(LED_RED, 1);
-            gpio_put(LED_GREEN, 1);
-            gpio_put(LED_BLUE, 1);
+            gpio_put(RED_LED_PIN, 1);
+            gpio_put(GREEN_LED_PIN, 1);
+            gpio_put(BLUE_LED_PIN, 1);
             enviar_dados_joystick(x, y);
         }
         else if (y < 1000) // O Joystick foi movido para baixo
         {
-            gpio_put(LED_GREEN, 1);
+            gpio_put(GREEN_LED_PIN, 1);
             enviar_dados_joystick(x, y);
         }
         else if (y > 3000) // O Joystick foi movido para cima
         {
-            gpio_put(LED_RED, 1);
+            gpio_put(RED_LED_PIN, 1);
             enviar_dados_joystick(x, y);
         }
         else if (gpio_get(JOYSTICK_SW_PIN) == 0) // O Joystick centralizado
         {
-            gpio_put(LED_RED, 1);
-            gpio_put(LED_GREEN, 1);
-            gpio_put(LED_BLUE, 1);
+            gpio_put(RED_LED_PIN, 1);
+            gpio_put(GREEN_LED_PIN, 1);
+            gpio_put(BLUE_LED_PIN, 1);
             enviar_dados_joystick(x, y);
         }
         else
         {
-            gpio_put(LED_RED, 0);
-            gpio_put(LED_GREEN, 0);
-            gpio_put(LED_BLUE, 0);
+            gpio_put(RED_LED_PIN, 0);
+            gpio_put(GREEN_LED_PIN, 0);
+            gpio_put(BLUE_LED_PIN, 0);
             //enviar_dados_joystick(x, y);
         }
         enviar_dados_joystick(x, y);
