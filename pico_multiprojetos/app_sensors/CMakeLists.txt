@@ -37,16 +37,21 @@ target_link_libraries(cliente_http
     hardware_adc
     pico_cyw43_arch_lwip_threadsafe_background
     exemplo_lwip_http_util # Vincula a biblioteca compartilhada
+    setup_utils # Biblioteca de setup_utils
+    io_utils    # Biblioteca de io_utils
 )
 
 # Inclui os diretórios de cabeçalhos 
 target_include_directories(cliente_http PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/lib_sensors # Adiciona o subdiretório lib_sensors
+    ${CMAKE_CURRENT_LIST_DIR}/lib_sensors/funcoes # Adiciona o subdiretório funcoes
     ${CMAKE_CURRENT_LIST_DIR}/../lib/base_server # Adiciona o subdiretório base_server
+    ${CMAKE_CURRENT_LIST_DIR}/../lib/io_utils
+    ${CMAKE_CURRENT_LIST_DIR}/../lib/setup_utils
 )
 # ======================================================================================================
 pico_add_extra_outputs(cliente_http)
-# ===================================================================================
+# ======================================================================================================
 
 # Cria o segundo executável
 # ===================================================================================
@@ -79,3 +84,54 @@ set_source_files_properties(
         COMPILE_OPTIONS "-Wno-unused-result"
         )
 # ===================================================================================
+
+# Cria o executavel do sensor de luminosidade, que é o cliente Flask.
+# ===================================================================================
+add_executable(cliente_sensor_1
+        cliente_sensor_1.c
+        )
+# ======================================================================================================        
+# Seta as configurações da rede Wi-Fi
+set(WIFI_SSID "SR-OLIVER") # Nome da sua rede wifi
+set(WIFI_PASSWORD "Jw5|0390") # Senha da rede wifi
+# Cria macros para definir as variáveis de ambiente
+# Isso é útil para que o código possa acessar essas variáveis em tempo de execução
+target_compile_definitions(cliente_sensor_1 PRIVATE   
+        WIFI_SSID=\"${WIFI_SSID}\" # Nome da sua rede wifi
+        WIFI_PASSWORD=\"${WIFI_PASSWORD}\" # Senha da rede wifi
+        )
+# ======================================================================================================
+# O comando "target_compile_definitions" define macros de pré-processador para o alvo cliente_sensor_1. 
+# Essas macros (WIFI_SSID e WIFI_PASSWORD) são usadas no código C/C++ como constantes para armazenar 
+#as credenciais Wi-Fi.
+# ======================================================================================================
+
+# Seta o nome do executável e a versão
+pico_set_program_name(cliente_sensor_1 "cliente_sensor_1")
+pico_set_program_version(cliente_sensor_1 "1.0")
+
+# # Configura USB/UART
+pico_enable_stdio_uart(cliente_sensor_1 0)
+pico_enable_stdio_usb(cliente_sensor_1 1)
+
+# Adiciona caminhos para headers .h
+target_link_libraries(cliente_sensor_1
+    pico_stdlib
+    hardware_adc
+    pico_cyw43_arch_lwip_threadsafe_background
+    exemplo_lwip_http_util # Vincula a biblioteca compartilhada
+    setup_utils # Biblioteca de setup_utils
+    io_utils    # Biblioteca de io_utils
+)
+
+# Inclui os diretórios de cabeçalhos 
+target_include_directories(cliente_sensor_1 PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}/lib_sensors # Adiciona o subdiretório lib_sensors
+    ${CMAKE_CURRENT_LIST_DIR}/lib_sensors/funcoes # Adiciona o subdiretório funcoes
+    ${CMAKE_CURRENT_LIST_DIR}/../lib/base_server # Adiciona o subdiretório base_server
+    ${CMAKE_CURRENT_LIST_DIR}/../lib/io_utils
+    ${CMAKE_CURRENT_LIST_DIR}/../lib/setup_utils
+)
+# ======================================================================================================
+pico_add_extra_outputs(cliente_sensor_1)
+# ======================================================================================================
