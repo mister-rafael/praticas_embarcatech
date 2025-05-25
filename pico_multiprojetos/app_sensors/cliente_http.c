@@ -14,8 +14,10 @@
 
 // ========== CONFIGURAÇÕES ======================== //
 // #define HOST "192.168.0.20" // IP do servidor de casa
-#define HOST "10.3.10.191" // IP do servidor do IFPI
-#define PORT 5000          // Porta do servidor
+//#define HOST "10.3.10.191" // IP do servidor do IFPI
+#define HOST "pico-server-web-bgkq.vercel.app" // IP do servidor web
+#define PORT 80         // Porta do servidor web
+//#define PORT 5000          // Porta do servidor
 #define INTERVALO_MS 500   // Intervalo de verificação do botão (em milissegundos)
 
 // Função para obter a posição do eixo X
