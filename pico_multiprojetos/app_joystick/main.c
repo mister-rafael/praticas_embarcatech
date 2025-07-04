@@ -9,9 +9,6 @@
 #define LED_RED 13
 #define LED_GREEN 11
 #define LED_BLUE 12
-#define JOYSTICK_X_PIN 26
-#define JOYSTICK_Y_PIN 27
-#define JOYSTICK_SW_PIN 22
 
 // Função para inicializar o LED RGB
 void iniciar_led_rgb()
@@ -22,16 +19,6 @@ void iniciar_led_rgb()
     gpio_set_dir(LED_GREEN, GPIO_OUT);
     gpio_init(LED_BLUE);
     gpio_set_dir(LED_BLUE, GPIO_OUT);
-}
-
-// Função para inicializar o joystick
-void iniciar_joystick(){
-    adc_init();
-    adc_gpio_init(JOYSTICK_X_PIN);
-    adc_gpio_init(JOYSTICK_Y_PIN);
-    gpio_init(JOYSTICK_SW_PIN);
-    gpio_set_dir(JOYSTICK_SW_PIN, GPIO_IN);
-    gpio_pull_up(JOYSTICK_SW_PIN);
 }
 
 // Função para obter a posição do eixo X
@@ -52,7 +39,7 @@ int main()
 {
     stdio_init_all();
     iniciar_led_rgb();           // Inicializa o LED RGB
-    iniciar_joystick();          // Inicializa o joystick
+    iniciar_joystick(JOYSTICK_X_PIN, JOYSTICK_Y_PIN, JOYSTICK_SW_PIN);          // Inicializa o joystick
     iniciar_botao(BUTTON_A_PIN); // Inicializa o botão A
     iniciar_botao(BUTTON_B_PIN); // Inicializa o botão B
     npInit(LED_PIN);

@@ -76,6 +76,7 @@ int main()
         .end_column = ssd1306_width - 1,
         .start_page = 0,
         .end_page = ssd1306_n_pages - 1};
+        
     calculate_render_area_buffer_length(&frame_area); // calcula o tamanho do buffer necessário para armazenar os dados da área de renderização.
     uint8_t buffer[ssd1306_buffer_length];            // É um buffer que armazena a imagem/tela antes de ser enviada para o OLED.
 

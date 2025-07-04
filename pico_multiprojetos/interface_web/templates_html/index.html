@@ -1,177 +1,71 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html>
 
 <head>
-  <meta charset="UTF-8">
-  <title>Estado dos Botões da BitDogLab</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      background: linear-gradient(to bottom right, #f0f0f0, #cccccc);
-      font-family: Arial, sans-serif;
-      color: #ffffff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    h1 {
-      margin-top: 30px;
-      color: #333333;
-      font-size: 2em;
-    }
-
-    .button-container {
-      display: flex;
-      gap: 40px;
-      margin: 40px 0;
-    }
-
-    .btn {
-      width: 160px;
-      height: 80px;
-      background-color: #2e2e2e;
-      color: white;
-      font-size: 1.3em;
-      font-weight: bold;
-      border: 3px solid #444;
-      border-radius: 10px;
-      cursor: pointer;
-      box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.5);
-      transition: all 0.3s ease;
-      perspective: 1000px;
-    }
-
-    .btn.pressionado {
-      border-color: #00ff00;
-      box-shadow: 0 0 12px #00ff00;
-      transform: translateY(2px);
-    }
-
-    #status-box {
-      width: 300px;
-      height: 150px;
-      background-color: rgb(18, 19, 18);
-      color: white;
-      font-size: 1.8em;
-      font-weight: bold;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      border-radius: 30px;
-      transition: background-color 0.3s ease;
-      text-align: center;
-    }
-
-    .joystick {
-      background: #2c118f;
-      padding: 20px;
-      margin: 40px 0;
-      border-radius: 15px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    }
-
-    .joystick h2 {
-      margin-top: 0;
-    }
-
-    @media (max-width: 600px) {
-      .button-container {
-        flex-direction: column;
-        align-items: center;
-      }
-    }
-  </style>
+    <title>Rafael Silva</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../static/css/estilo_principal.css"> <!-- Incluindo o arquivo CSS -->
+    <link rel="stylesheet" type="text/css" href="../static/bootstrap_principal/bootstrap.min.css">
+    <!-- Incluindo o Bootstrap -->
+    <link rel="stylesheet" type="text/css" href="../static/css/normalize.css"> <!-- Normalizando o CSS -->
 </head>
 
 <body>
-
-  <h1>Estado dos Botões da BitDogLab</h1>
-
-  <div class="button-container">
-    <button id="botaoA" class="btn">Botão A</button>
-    <button id="botaoB" class="btn">Botão B</button>
-  </div>
-
-  <div id="status-box">Aguardando...</div>
-
-  <div class="joystick">
-    <h2>Posição do Joystick</h2>
-    <p>X: <span id="x-pos">0</span></p>
-    <p>Y: <span id="y-pos">0</span></p>
-  </div>
-  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-  <script>
-    const socket = io();
-
-    const statusBox = document.getElementById('status-box');
-    const botaoA = document.getElementById('botaoA');
-    const botaoB = document.getElementById('botaoB');
-
-    const xSpan = document.getElementById('x-pos');
-    const ySpan = document.getElementById('y-pos');
-
-    // Controla os estados individuais
-    let estadoA = 'solto';
-    let estadoB = 'solto';
-
-    socket.on('connect', () => {
-      console.log('Conectado ao servidor via Socket.IO');
-    });
-
-    socket.on('command', (data) => {
-      if (data.action === 'click_a') {
-        if (estadoA != 'pressionado') { // Verifica se o botão A não está pressionado
-          botaoA.classList.add('pressionado');
-          statusBox.textContent = 'Botão A, pressionado!';
-          estadoA = 'pressionado';
-
-        }
-      } else if (data.action === 'solto_a') {
-        if (estadoA == 'pressionado') { // Verifica se o botão A está pressionado
-          botaoA.classList.remove('pressionado');
-          statusBox.textContent = 'Botão A, solto!';
-          estadoA = 'solto';
-        }
-      }
-      //VERIFICAR BOTÃO B
-      if (data.action === 'click_b') {
-        if (estadoB != 'pressionado') { // Verifica se o botão B não está pressionado
-          botaoB.classList.add('pressionado');
-          statusBox.textContent = 'Botão B, pressionado!';
-          estadoB = 'pressionado';
-        }
-      } else if (data.action === 'solto_b') {
-        if (estadoB == 'pressionado') { // Verifica se o botão B está pressionado
-          botaoB.classList.remove('pressionado');
-          statusBox.textContent = 'Botão B, solto!';
-          estadoB = 'solto';
-        }
-      }
-
-      // Atualiza mensagem central
-
-      //statusBox.textContent = `Botão A: ${estadoA.toUpperCase()} | Botão B: ${estadoB.toUpperCase()}`;
-
-      if (estadoA === 'pressionado' || estadoB === 'pressionado') {
-        statusBox.style.backgroundColor = 'green';
-        statusBox.innerHTML = `Botão A: ${estadoA.toUpperCase()}<br>Botão B: ${estadoB.toUpperCase()}`;
-      } else {
-        statusBox.style.backgroundColor = 'red';
-        statusBox.textContent = `Aguardando...`;
-      }
-    });
-    // Listener para receber os valores do joystick
-    socket.on('joystick', (data) => {
-      // Atualiza os spans dos valores X e Y
-      xSpan.textContent = data.x;
-      ySpan.textContent = data.y;
-      console.log(`Joystick: X = ${data.x}, Y = ${data.y}`);
-    });
-  </script>
-
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <div class="container-fluid conteudo">
+        <div class="row cabecalho"> <!--L1 - Cabeçalho-->
+            <div class="col-md-2 titulo"> <!--L1_C1 - Título-->
+                <h1>Rafael Silva</h1>
+            </div>
+            <div class="col-md-10 titulo"> <!--L1_C2 - Título-->
+                <h1>Minhas práticas do Embarcatech</h1>
+            </div>
+        </div>
+        <div class="row"> <!--L2 - Corpo-->
+            <div class="col-md"> <!--L2_C1 - Supercoluna-->
+                <div class="row"><!--L2_C1_LBASE_01-->
+                    <div class="col-md-4 coluna"> <!--L2_C1_LBASE_01_C1-->
+                        <div class="quadro d-grid">
+                            <h1 class="titulo">Estado dos Botões da BitDogLab</h1>
+                            <hr>
+                            <div class="button-container">
+                                <button id="botaoA" class="btn">Botão A</button>
+                                <button id="botaoB" class="btn">Botão B</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 coluna"> <!--L2_C1_LBASE_01_C2-->
+                        <div class="quadro d-grid">
+                            <h1 class="titulo">MONITOR STATUS</h1>
+                            <hr>
+                            <div id="status-box">Aguardando...</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 coluna"> <!--L2_C1_LBASE_01_C3-->
+                        <div class="quadro d-grid">
+                            <h1 class="titulo">POSIÇÃO JOYSTICK</h1>
+                            <hr>
+                            <div class="joystick">
+                                <h2>Posição do Joystick</h2>
+                                <p>X: <span id="x-pos">0</span></p>
+                                <p>Y: <span id="y-pos">0</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row"><!--Linha rodapé-->
+            <div class="col-md-12 rodape lead">
+                <p><strong>Rafael Silva, Residente Embarcatech.</strong></p>
+                <p><strong>Instituto Federal do Piauí - Campus Teresina Zona Sul</strong></p>
+                <p><strong>Página criada em 2025, na fase de residência.</strong></p>
+            </div>
+        </div>
+    </div>
+    <!-- Local destinado a inclusão do JavaScript -->
+    <script src="../static/javascripts/scripts.js"></script>
 </body>
+
 
 </html>

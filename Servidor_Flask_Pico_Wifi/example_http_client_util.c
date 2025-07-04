@@ -65,7 +65,6 @@ err_t http_client_receive_print_fn(__unused void *arg, __unused struct altcp_pcb
 }
 
 
-
 static err_t internal_header_fn(httpc_state_t *connection, void *arg, struct pbuf *hdr, u16_t hdr_len, u32_t content_len) {
     assert(arg);
     EXAMPLE_HTTP_REQUEST_T *req = (EXAMPLE_HTTP_REQUEST_T*)arg;

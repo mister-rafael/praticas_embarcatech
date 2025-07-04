@@ -9,7 +9,7 @@
 #include "example_http_client_util.h"
 
 // ======= CONFIGURAÇÕES ======= //
-#define HOST "10.3.10.152" // Substitua pelo IP do servidor
+#define HOST "192.168.0.20" // Substitua pelo IP do servidor
 #define PORT 5000
 #define INTERVALO_MS 500
 #define BUTTON_A 5

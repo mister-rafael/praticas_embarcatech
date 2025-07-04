@@ -39,6 +39,10 @@
     "files.associations": {
         "async_context.h": "c",
         "example_http_client_util.h": "c",
-        "adc.h": "c"
+        "adc.h": "c",
+        "ssd1306.h": "c",
+        "exemplo_http_client_util.h": "c",
+        "actions_io.h": "c",
+        "i2c.h": "c"
     }
 }

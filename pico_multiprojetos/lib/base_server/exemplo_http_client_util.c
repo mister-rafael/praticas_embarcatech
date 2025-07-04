@@ -55,27 +55,6 @@ int wifi_connect(const char *ssid, const char *password)
     printf("Conectado! IP: %s\n", ip4addr_ntoa(netif_ip4_addr(netif_list)));
     return 0; // Retorna 0 em caso de sucesso
 }
-void iniciar_botao(uint pin)
-{
-    gpio_init(pin); // Inicializa o pino do botão
-    gpio_set_dir(pin, GPIO_IN); // Define o pino como entrada
-    gpio_pull_up(pin); 
-}
-void iniciar_led(uint pin)
-{
-    gpio_init(pin); // Inicializa o pino do LED
-    gpio_set_dir(pin, GPIO_OUT); // Define o pino como saída
-}
-// Função para inicializar o joystick
-void iniciar_joystick(uint pinx, uint piny, uint pinw)
-{
-    adc_init(); // Inicializa o ADC
-    adc_gpio_init(pinx); // Inicializa o pino do eixo X
-    adc_gpio_init(piny); // Inicializa o pino do eixo Y
-    gpio_init(pinw); // Inicializa o pino do botão do joystick
-    gpio_set_dir(pinw, GPIO_IN); // Define o pino como entrada
-    gpio_pull_up(pinw); // Ativa o pull-up interno
-}
 // ========================================================= //
 // Print headers to stdout
 err_t http_client_header_print_fn(__unused httpc_state_t *connection, __unused void *arg, struct pbuf *hdr, u16_t hdr_len, __unused u32_t content_len)

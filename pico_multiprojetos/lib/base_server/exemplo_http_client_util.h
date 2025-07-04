@@ -8,20 +8,6 @@
 
 #include "lwip/apps/http_client.h"
 
-// ==================== DEFINIÇÕES DE PINOS ==================== //
-// Define os pinos utilizados para os botões e LEDs no projeto.
-#define BUTTON_A 5          // Pino do botão A (GPIO 5)
-#define BUTTON_B 6          // Pino do botão B (GPIO 6)
-#define LED_RED 13          // Pino do LED vermelho (GPIO 13)
-#define LED_GREEN 12        // Pino do LED verde (GPIO 12)
-#define LED_BLUE 11         // Pino do LED azul (GPIO 11)
-
-// ============ CONFIGURAÇÕES DO JOYSTICK ============ //
-// Define os pinos conectados ao joystick analógico.
-#define JOYSTICK_X_PIN 27   // Canal ADC para eixo X (GPIO 27)
-#define JOYSTICK_Y_PIN 26   // Canal ADC para eixo Y (GPIO 26)
-#define JOYSTICK_SW_PIN 22  // Pino digital do botão do joystick (GPIO 22)
-
 // ==================== FUNÇÕES AUXILIARES ==================== //
 /**
  * @brief Conecta à rede Wi-Fi especificada.
