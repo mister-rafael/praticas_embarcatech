@@ -3,6 +3,7 @@
 #include "hardware/gpio.h" // Biblioteca para manipulação de GPIO
 #include "hardware/pwm.h" // Biblioteca para manipulação de PWM
 #include "hardware/clocks.h" // Biblioteca para manipulação de clocks
+#include "hardware/adc.h"
 
 // Função para configurar o botão
 // Esta função inicializa o pino do botão como entrada e ativa o resistor de pull-up interno
@@ -46,5 +47,14 @@ void iniciar_buzzer(uint pin) {
     // Define o nível do pino como 0 (desligado)
     pwm_set_gpio_level(pin, 0); 
 }
-
+// Função para inicializar o joystick
+void iniciar_joystick(uint pinx, uint piny, uint pinw)
+{
+    adc_init(); // Inicializa o ADC
+    adc_gpio_init(pinx); // Inicializa o pino do eixo X
+    adc_gpio_init(piny); // Inicializa o pino do eixo Y
+    gpio_init(pinw); // Inicializa o pino do botão do joystick
+    gpio_set_dir(pinw, GPIO_IN); // Define o pino como entrada
+    gpio_pull_up(pinw); // Ativa o pull-up interno
+}
 // FUNÇÃO PARA INICIAR A MATRIZ DE LED
