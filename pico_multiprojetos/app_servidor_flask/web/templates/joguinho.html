@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Jogo da API-Garçom 🍔</title>
+  <style>
+    body {
+      font-family: 'Comic Sans MS', sans-serif;
+      background-color: #fef6e4;
+      text-align: center;
+      padding: 50px;
+    }
+    h1 {
+      font-size: 2em;
+      color: #ff6f61;
+    }
+    button {
+      font-size: 1.2em;
+      padding: 10px 20px;
+      margin: 10px;
+      background-color: #ffcc70;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    button:hover {
+      transform: scale(1.1);
+    }
+    pre {
+      background: #fff5;
+      padding: 15px;
+      border-radius: 8px;
+      font-size: 1em;
+      text-align: left;
+      display: inline-block;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🍽️ Jogo da API-Garçom</h1>
+  <p>Faça seu pedido:</p>
+  <button onclick="fazerPedido('pizza')">🍕 Pizza</button>
+  <button onclick="fazerPedido('hamburguer')">🍔 Hambúrguer</button>
+  <button onclick="fazerPedido('suco')">🥤 Suco</button>
+
+  <div id="resposta"></div>
+
+  <script>
+    function fazerPedido(item) {
+      const respostaDiv = document.getElementById("resposta");
+      respostaDiv.innerHTML = `<p>⏳ Enviando pedido de <strong>${item}</strong> para a API...</p>`;
+
+      // Simula o tempo de resposta da API (1 segundo)
+      setTimeout(() => {
+        const resposta = {
+          pedido: item,
+          status: "pronto",
+          tempo: "5 minutos",
+          mensagem: `Seu ${item} está quentinho!`
+        };
+
+        respostaDiv.innerHTML = `<h2>📦 Resposta da API:</h2>
+        <pre>${JSON.stringify(resposta, null, 2)}</pre>`;
+      }, 1000);
+    }
+  </script>
+
+</body>
+</html>

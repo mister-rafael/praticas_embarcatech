@@ -102,9 +102,6 @@
     <p>X: <span id="x-pos">0</span></p>
     <p>Y: <span id="y-pos">0</span></p>
   </div>
-
-
-
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
   <script>
     const socket = io();
@@ -128,7 +125,7 @@
       if (data.action === 'click_a') {
         if (estadoA != 'pressionado') { // Verifica se o botão A não está pressionado
           botaoA.classList.add('pressionado');
-          statusBox.textContent = data;
+          statusBox.textContent = 'Botão A, pressionado!';
           estadoA = 'pressionado';
 
         }

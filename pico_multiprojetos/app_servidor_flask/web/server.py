@@ -13,8 +13,6 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 def index():
     return render_template('index.html')  # Renderiza o template web/templates/index.html
 
-
-
 @app.route('/CLICK_A', methods=['GET', 'POST']) # Define a rota para o comando de clique
 # Define uma função para lidar com o evento de clique do botão A
 def click_a():
@@ -56,4 +54,4 @@ def joystick():
 # Ponto de entrada principal da aplicação
 if __name__ == '__main__':
     # Inicia o servidor Flask com suporte a WebSockets
-    socketio.run(app, host='0.0.0.0', port=5000)
+    socketio.run(app, host='0.0.0.0', port=5000) # Permite conexões de qualquer IP na porta 5000

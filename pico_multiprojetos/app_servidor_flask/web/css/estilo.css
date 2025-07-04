@@ -1,0 +1,98 @@
+/* Estilo para o corpo da página */
+body {
+    margin: 0; /* Remove a margem padrão */
+    padding: 0; /* Remove o preenchimento padrão */
+    height: 100vh; /* Altura total da tela */
+    display: flex; /* Flexbox para centralizar */
+    justify-content: center; /* Centraliza horizontalmente */
+    align-items: center; /* Centraliza verticalmente */
+    background: linear-gradient(135deg, #4f6072, #a3a5a7, #2c3e50);
+    font-family: 'Arial', sans-serif; /* Fonte padrão */
+    overflow: hidden; /* Remove a barra de rolagem */
+}
+
+/* Estilo para o cabeçalho */
+h1 {
+    color: #333;
+    /* Cor do texto */
+    text-align: center;
+    /* Centraliza o texto */
+    margin-bottom: 20px;
+    /* Margem inferior */
+}
+
+
+/* Estilo para o botão dinâmico */
+.botao-dinamico {
+    background-color: #4CAF50;
+    /* Verde */
+    border: none;
+    /* Remove a borda */
+    color: white;
+    /* Texto branco */
+    padding: 15px 32px;
+    /* Espaçamento interno */
+    text-align: center;
+    /* Centraliza o texto */
+    text-decoration: none;
+    /* Remove o sublinhado */
+    display: inline-block;
+    /* Exibe como bloco em linha */
+    font-size: 16px;
+    /* Tamanho da fonte */
+    margin: 4px 2px;
+    /* Margem */
+    cursor: pointer;
+    /* Cursor de ponteiro */
+    border-radius: 12px;
+    /* Bordas arredondadas */
+    transition: background-color 0.3s;
+    /* Transição suave */
+}
+.botao-dinamico:hover {
+    background-color: #2e7031;
+    /* Verde mais escuro ao passar o mouse */
+}
+
+/* Estilo para o ponteiro giratório */
+.ponteiro-container {
+  width: 200px;
+  height: 200px;
+  margin: 20px auto;
+  position: relative;
+  border: 2px solid #0c0c0c;
+  border-radius: 50%;
+  background: white;
+}
+
+#ponteiro {
+  width: 4px;
+  height: 90px;
+  background: red;
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%) rotate(0deg);
+  transform-origin: bottom center;
+  transition: transform 0.3s ease;
+}
+
+.botoes {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+button {
+  padding: 10px 20px;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  background: teal;
+  color: white;
+  cursor: pointer;
+}
+
+button:hover {
+  background: darkslategray;
+}
