@@ -6,17 +6,16 @@
 // Define os pinos GPIO que serão usados para SDA e SCL do sensor MPU_6050
 static const uint I2C_SDA_MPU6050 = 0; // Pino SDA
 static const uint I2C_SCL_MPU6050 = 1; // Pino SCL
-static const uint I2C_BAUDRATE_MPU6050 = 100 * 1000; // 100KHZ
+static const uint I2C_BAUDRATE_MPU6050 = 300 * 1000; // 300KHZ
 
-// Endereço I2C do sensor AHT10
+// Endereço I2C do sensor MPU6050
 const uint8_t MPU6050_ADDR = 0x68;
 
-///#define MPU6050_ADDR 0x68
-
-#define MPU6050_PWR_MGMT_1 0x6B
-#define MPU6050_ACCEL_XOUT_H 0x3B
-#define MPU6050_GYRO_XOUT_H 0x43
-
+// Registradores do MPU6050
+// Estes são os registradores mais comuns usados para inicializar e ler dados do MPU6050
+const uint8_t MPU6050_PWR_MGMT_1 = 0x6B; // Registrador de gerenciamento de energia
+const uint8_t MPU6050_ACCEL_XOUT_H = 0x3B; // Registrador de saída de aceleração no eixo X (alta)
+const uint8_t MPU6050_GYRO_XOUT_H = 0x43; // Registrador de saída de giroscópio no eixo X (alta)
 
 
 // --- Protótipos de Funções ---
@@ -26,20 +25,28 @@ void mpu6050_read_raw_data(int16_t accel[3], int16_t gyro[3]);
 // --- Implementação das Funções ---
 
 void mpu6050_init() {
+    // 1. Inicializa a interface I2C com uma velocidade de 100kHz (padrão seguro)
     i2c_init(i2c0, I2C_BAUDRATE_MPU6050);
+    // 2. Configura os pinos GPIO, do sensor MPU6050 para I2C
     gpio_set_function(I2C_SDA_MPU6050, GPIO_FUNC_I2C);
     gpio_set_function(I2C_SCL_MPU6050, GPIO_FUNC_I2C);
+    // 3. Ativa os resistores de pull-up internos da Pico para os pinos I2C do sensor.
     gpio_pull_up(I2C_SDA_MPU6050);
     gpio_pull_up(I2C_SCL_MPU6050);
 
     printf("I2C0 para MPU6050 configurado.\n");
     sleep_ms(100);
 
-    uint8_t buf[2];
-    buf[0] = MPU6050_PWR_MGMT_1;
-    buf[1] = 0x00;
+    uint8_t buf[2]; // Buffer para enviar dados de configuração
+    // Acorda o MPU6050 e configura o registrador PWR_MGMT_1
+    // O MPU6050 precisa ser acordado do modo de sono antes de ser usado.
+    buf[0] = MPU6050_PWR_MGMT_1; //Endereço do "Interruptor de energia"
+    buf[1] = 0x00; //Mensagem "Ligar"
     
+    // Envia o comando para acordar o MPU6050
     int ret = i2c_write_blocking(i2c0, MPU6050_ADDR, buf, 2, false);
+
+    // Verifica se houve erro na escrita
     if (ret == PICO_ERROR_GENERIC) {
         printf("Erro ao acordar MPU6050! Verifique conexoes e endereco I2C.\n");
     } else {
@@ -48,10 +55,14 @@ void mpu6050_init() {
     sleep_ms(100);
 }
 
+// Função para ler os dados brutos de aceleração e giroscópio do MPU6050
 void mpu6050_read_raw_data(int16_t accel[3], int16_t gyro[3]) {
+    // 1. Cria um buffer para armazenar os dados lidos do MPU6050
+    // O MPU6050 retorna 14 bytes de dados: 6 Bytes de aceleração e 6 bytes de giroscópio,
+    // além de 2 bytes de temperatura (que não é utilizado aqui).
     uint8_t buffer[14];
 
-    uint8_t reg_addr = MPU6050_ACCEL_XOUT_H;
+    uint8_t reg_addr = MPU6050_ACCEL_XOUT_H; 
     int ret = i2c_write_blocking(i2c0, MPU6050_ADDR, &reg_addr, 1, true);
     if (ret == PICO_ERROR_GENERIC) {
         printf("Erro ao solicitar leitura de dados do MPU6050.\n");
@@ -64,9 +75,9 @@ void mpu6050_read_raw_data(int16_t accel[3], int16_t gyro[3]) {
         return;
     }
 
-    accel[0] = (int16_t)((buffer[0] << 8) | buffer[1]);
-    accel[1] = (int16_t)((buffer[2] << 8) | buffer[3]);
-    accel[2] = (int16_t)((buffer[4] << 8) | buffer[5]);
+    accel[0] = (int16_t)((buffer[0] << 8) | buffer[1]); // accel[0] = (buffer[0] * 256) + buffer[1];
+    accel[1] = (int16_t)((buffer[2] << 8) | buffer[3]); // accel[1] = (buffer[2] * 256) + buffer[3];
+    accel[2] = (int16_t)((buffer[4] << 8) | buffer[5]); // accel[2] = (buffer[4] * 256) + buffer[5];
 
     gyro[0] = (int16_t)((buffer[8] << 8) | buffer[9]);
     gyro[1] = (int16_t)((buffer[10] << 8) | buffer[11]);

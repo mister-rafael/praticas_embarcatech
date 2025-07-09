@@ -11,6 +11,7 @@ const uint I2C_SCL_DISPLAY = 15;
 // Configuração I2C para Sensor AHT10
 const uint I2C_SDA_SENSOR = 0;
 const uint I2C_SCL_SENSOR = 1;
+
 #define AHT10_ADDR 0x38
 
 // Funções para o sensor AHT10
